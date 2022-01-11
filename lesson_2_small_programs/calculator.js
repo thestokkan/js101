@@ -4,11 +4,17 @@
 // Perform the operation on the two numbers.
 // Print the result to the terminal.
 
-const msg = require("./calculator_msg.json").no;
-
+const MESSAGES = require("./calculator_messages.json");
 const read = require("readline-sync");
+const LANGUAGE = "no";
+const CONFIRM = MESSAGES[LANGUAGE].confirm;
 
-function prompt(message) {
+function messages(message, lang = "en") {
+  return MESSAGES[lang][message];
+}
+
+function prompt(msg) {
+  let message = messages(msg, LANGUAGE);
   console.log(`=> ${message}`);
 }
 
@@ -16,32 +22,32 @@ function invalidNumber(number) {
   return number.trimStart() === "" || Number.isNaN(Number(number));
 }
 
-prompt(msg.welcome);
+prompt("welcome");
 
 let again = true;
 
 do {
-  prompt(msg.firstNumber);
+  prompt("firstNumber");
   let number1 = read.question();
 
   while (invalidNumber(number1)) {
-    prompt(msg.validNumber);
+    prompt("validNumber");
     number1 = read.question();
   }
 
-  prompt(msg.secondNumber);
+  prompt("secondNumber");
   let number2 = read.question();
 
   while (invalidNumber(number2)) {
-    prompt(msg.validNumber);
+    prompt("validNumber");
     number2 = read.question();
   }
 
-  prompt(msg.operation);
+  prompt("operation");
   let operation = read.question();
 
   while (!["1", "2", "3", "4"].includes(operation)) {
-    prompt(msg.validOperation);
+    prompt("validOperation");
     operation = read.question();
   }
 
@@ -61,12 +67,13 @@ do {
       break;
   }
 
-  prompt(msg.resultIs + `${output.toFixed(2)}`);
+  prompt("resultIs")
+  console.log(`${output.toFixed(2)}`);
 
-  prompt(msg.again);
+  prompt("again");
   let answer = read.question();
 
-  if (!["y", "yes"].includes(answer.toLowerCase())) {
+  if (!CONFIRM.includes(answer.toLowerCase())) {
     again = false;
   }
 } while (again);
