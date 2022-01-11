@@ -4,6 +4,8 @@
 // Perform the operation on the two numbers.
 // Print the result to the terminal.
 
+const msg = require("./calculator_msg.json").no;
+
 const read = require("readline-sync");
 
 function prompt(message) {
@@ -14,36 +16,32 @@ function invalidNumber(number) {
   return number.trimStart() === "" || Number.isNaN(Number(number));
 }
 
-prompt("Welcome to calculator!");
+prompt(msg.welcome);
 
-let continue;
+let again = true;
 
 do {
-
-  prompt("What's the first number?");
+  prompt(msg.firstNumber);
   let number1 = read.question();
 
   while (invalidNumber(number1)) {
-    prompt("Please input a valid number: ");
+    prompt(msg.validNumber);
     number1 = read.question();
   }
 
-  prompt("What's the second number?");
+  prompt(msg.secondNumber);
   let number2 = read.question();
 
   while (invalidNumber(number2)) {
-    prompt("Please input a valid number: ");
+    prompt(msg.validNumber);
     number2 = read.question();
   }
 
-  console.log(
-    "What operation would you like to perform?\n1) Add \n2) Subtract" +
-      "\n3) Multiply \n4) Divide"
-  );
+  prompt(msg.operation);
   let operation = read.question();
 
   while (!["1", "2", "3", "4"].includes(operation)) {
-    console.log("Please input a number (1-4): ");
+    prompt(msg.validOperation);
     operation = read.question();
   }
 
@@ -61,19 +59,14 @@ do {
     case "4":
       output = Number(number1) / Number(number2);
       break;
-    default:
-      console.log("Please enter 1-4: ");
   }
 
-  console.log(`The result is ${output.toFixed(2)}`);
+  prompt(msg.resultIs + `${output.toFixed(2)}`);
 
-  prompt('Do you want to perform anoter calculation? (y/n)');
-  let answerToContinue = read.question();
+  prompt(msg.again);
+  let answer = read.question();
 
-  if (['y', 'yes'].includes(answer.toLowerCase())) {
-    continue = true;
-  } else
-    continue = false;
+  if (!["y", "yes"].includes(answer.toLowerCase())) {
+    again = false;
   }
-
-} while (continue);
+} while (again);
