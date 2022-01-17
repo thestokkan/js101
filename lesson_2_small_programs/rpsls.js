@@ -44,15 +44,15 @@
 
 const read = require("readline-sync");
 const os = require("os");
-
-function prompt(message) {
-  console.log(`=> ${message}`);
-}
-
 const computer = os.hostname();
 let player = "";
 
-// Translate choice input from number to word
+// Helper functions
+
+function prompt(message) {
+  console.log(`>>> ${message}`);
+}
+
 function choiceToWords(choice) {
   switch (choice) {
     case "r":
@@ -70,7 +70,7 @@ function choiceToWords(choice) {
 }
 
 function displayChoices() {
-  console.log("r) Rock\np) Paper\ns) Scissors\nl) Lizard\nS) Spock");
+  console.log(" r) Rock\n p) Paper\n s) Scissors\n l) Lizard\n S) Spock");
 }
 function getPlayerChoice() {
   prompt("Make your choice:");
@@ -78,7 +78,7 @@ function getPlayerChoice() {
   let playerChoiceNum = read.question("");
 
   while (!["r", "p", "s", "l", "S"].includes(playerChoiceNum)) {
-    prompt('Invalid input, please choose one of the below letters:');
+    prompt("Invalid input, please choose one of the below letters:");
     displayChoices();
     playerChoiceNum = read.question("");
   }
@@ -103,28 +103,61 @@ function choicesIncludes(choices, handA, handB, handC) {
 
 function getWinningHand(choiceA, choiceB) {
   let choices = [choiceA, choiceB];
+  let winningHand;
 
-  if (choiceA === choiceB) return "";
-
+  if (choiceA === choiceB) winningHand = "";
   if (choicesIncludes(choices, "Rock", "Scissors", "Lizard")) {
-    return "Rock";
+    winningHand = "Rock";
+  } else if (choicesIncludes(choices, "Paper", "Rock", "Spock")) {
+    winningHand = "Paper";
+  } else if (choicesIncludes(choices, "Scissors", "Paper", "Lizard")) {
+    winningHand = "Scissors";
+  } else if (choicesIncludes(choices, "Lizard", "Paper", "Spock")) {
+    winningHand = "Lizard";
+  } else if (choicesIncludes(choices, "Spock", "Scissors", "Rock")) {
+    winningHand = "Spock";
   }
 
-  if (choicesIncludes(choices, "Paper", "Rock", "Spock")) {
-    return "Paper";
-  }
+  return winningHand;
+}
 
-  if (choicesIncludes(choices, "Scissors", "Paper", "Lizard")) {
-    return "Scissors";
-  }
+function getRoundWinner(playerChoice, computerChoice, winningHand) {
+  let winner;
 
-  if (choicesIncludes(choices, "Lizard", "Paper", "Spock")) {
-    return "Lizard";
+  if (playerChoice === winningHand) {
+    winner = player;
+  } else if (computerChoice === winningHand) {
+    winner = computer;
   }
+  return winner;
+}
 
-  if (choicesIncludes("Spock", "Scissors", "Rock")) {
-    return "Spock";
+function displayRoundWinner(roundWinner, playerChoice, computerChoice) {
+  if (roundWinner === player) {
+    prompt(`${playerChoice} beats ${computerChoice}!`);
+    prompt("You win!");
+  } else if (roundWinner === computer) {
+    prompt(`${computerChoice} beats ${playerChoice}.`);
+    prompt("You lose...");
+  } else {
+    prompt("It's a tie!");
   }
+}
+
+function updateScores(roundWinner, scores) {
+  if (roundWinner === player) {
+    scores.player += 1;
+  } else if (roundWinner === computer) {
+    scores.computer += 1;
+  }
+}
+
+function displayScores(scores) {
+  console.log("");
+  prompt("Scores:");
+  prompt(`${player}: ${scores.player}`);
+  prompt(`${computer}: ${scores.computer}`);
+  console.log("");
 }
 
 // Name and welcome
@@ -133,32 +166,57 @@ while (player === "") {
   player = read.question("");
 }
 
+console.log("");
 prompt(`Welcome to Rock, paper, scissors, ${player}!`);
 prompt(`You will be playing against ${computer} today.`);
 console.log("");
 
 // Game loop
 while (true) {
-  const playerChoice = getPlayerChoice();
-  const computerChoice = getComputerChoice();
+  let scores = { player: 0, computer: 0 };
+  let winner;
+  let counter = 0;
 
-  prompt(`You chose ${playerChoice}.`);
-  prompt(`${computer} chose ${computerChoice}.`);
+  // Round loop
+  while (true) {
+    counter += 1;
+    let roundWinner;
+
+    prompt(`=== ROUND ${counter} ===`);
+    console.log("");
+
+    let playerChoice = getPlayerChoice();
+    let computerChoice = getComputerChoice();
+
+    prompt(`You chose ${playerChoice}.`);
+    prompt(`${computer} chose ${computerChoice}.`);
+    console.log("");
+
+    let winningHand = getWinningHand(playerChoice, computerChoice);
+    roundWinner = getRoundWinner(playerChoice, computerChoice, winningHand);
+
+    displayRoundWinner(roundWinner, playerChoice, computerChoice);
+    updateScores(roundWinner, scores);
+    displayScores(scores);
+
+    if (scores.player >= 3) {
+      winner = player;
+      break;
+    } else if (scores.computer >= 3) {
+      winner = computer;
+      break;
+    }
+  }
+
+  console.log("");
+  console.log("=====================================");
+  prompt(`The grand winner is: \n${winner}!!!`);
   console.log("");
 
-  let winningHand = getWinningHand(playerChoice, computerChoice);
-
-  if (winningHand) {
-    if (playerChoice === winningHand) {
-      prompt(`${playerChoice} beats ${computerChoice}!`);
-      prompt("You win!");
-    } else {
-      prompt(`${computerChoice} beats ${playerChoice}.`);
-      prompt("You lose...");
-    }
-  } else {
-    prompt("It's a tie!");
-  }
+  prompt("Final Scores:");
+  prompt(`${player}: ${scores.player}`);
+  prompt(`${computer}: ${scores.computer}`);
+  console.log("=====================================");
 
   console.log("");
   prompt("That was fun!");
