@@ -22,7 +22,10 @@
 //    - Create a board using horizontal and vertical lines
 //      - line
 
-let read = require('readline-sync');
+let read = require("readline-sync");
+const INITIAL_MARKER = " ";
+const PLAYER_MARKER = "X";
+const COMPUTER_MARKER = "O";
 
 function displayBoard(board) {
   console.log("");
@@ -43,10 +46,59 @@ function newBoard() {
   let board = {};
 
   for (let square = 1; square <= 9; square++) {
-    board[square] = " ";
+    board[square] = INITIAL_MARKER;
   }
   return board;
 }
 
-let board = newBoard();
-displayBoard(board);
+function emptySquares(board) {
+  return Object.keys(board).filter((key) => board[key] === INITIAL_MARKER);
+}
+
+function playerChoosesSquare(board) {
+  let square;
+
+  while (true) {
+    square = read
+      .question(`Pick a square (${emptySquares(board).join(",")}): `)
+      .trim();
+
+    if (emptySquares(board).includes(square)) break;
+
+    console.log("Invalid input, try again.");
+  }
+  board[square] = PLAYER_MARKER;
+}
+
+function computerChoosesSquare(board) {
+  randIndex = Math.floor(Math.random() * emptySquares(board).length);
+
+  let square = emptySquares(board)[randIndex];
+
+  board[square] = COMPUTER_MARKER;
+}
+
+// Let the game begin!
+console.log("\nWelcome to Tic Tac Toe!");
+
+// Outer loop
+while (true) {
+  console.log("\nLet's play!");
+  let board = newBoard();
+  displayBoard(board);
+
+  // Inner loop
+  while (emptySquares(board).length > 0) {
+    playerChoosesSquare(board);
+    displayBoard(board);
+
+    computerChoosesSquare(board);
+    displayBoard(board);
+  }
+
+  let answer = read.question("Do you want to play again (y/n)? ");
+
+  if (!["y", "Y"].includes(answer)) break;
+}
+
+console.log("Thanks for playing!");
