@@ -22,14 +22,18 @@
 //    - Create a board using horizontal and vertical lines
 //      - line
 
+
 let read = require("readline-sync");
+
 const INITIAL_MARKER = " ";
 const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
 
 function displayBoard(board) {
   console.clear();
-  
+
+  console.log(`You are ${PLAYER_MARKER}, computer is ${COMPUTER_MARKER}`);
+
   console.log("");
   console.log(" _______ _______ _______ ");
   console.log("|       |       |       |");
@@ -85,30 +89,62 @@ function fullBoard(board) {
 }
 
 function someoneWon(board) {
-  return false;
+  return !!detectWinner(board);
+}
+
+function detectWinner(board) {
+  let winningLines = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [1, 4, 7],
+    [2, 5, 8],
+    [3, 6, 9],
+    [1, 5, 9],
+    [3, 5, 7],
+  ];
+
+  // Loop through winningLines array
+  for (let line = 0; line < winningLines.length; line++) {
+    let [sq1, sq2, sq3] = winningLines[line];
+
+    if (board[sq1] === board[sq2] && board[sq2] === board[sq3]) {
+      if (board[sq1] === PLAYER_MARKER) return "Player";
+      if (board[sq1] === COMPUTER_MARKER) return "Computer";
+    }
+  }
+
+  return null;
 }
 
 // Let the game begin!
-console.log("\nWelcome to Tic Tac Toe!");
 
 // Outer loop
 while (true) {
-  console.log("\nLet's play!");
   let board = newBoard();
   displayBoard(board);
 
   // Inner loop
   while (true) {
-    playerChoosesSquare(board);
-    computerChoosesSquare(board);
     displayBoard(board);
 
+    playerChoosesSquare(board);
+    if (someoneWon(board)) break;
+
+    computerChoosesSquare(board);
     if (someoneWon(board) || fullBoard(board)) break;
   }
 
-  let answer = read.question("Do you want to play again (y/n)? ");
+  displayBoard(board);
 
-  if (!["y", "Y"].includes(answer)) break;
+  if (someoneWon(board)) {
+    console.log(`\n${detectWinner(board)} won!`);
+  } else {
+    console.log("\nIt's a tie!");
+  }
+
+  let answer = read.question("\nDo you want to play again (y/n)? ").trim();
+  if (answer.toLowerCase() !== "y") break;
 }
 
-console.log("Thanks for playing!");
+console.log("\nThanks for playing!");
