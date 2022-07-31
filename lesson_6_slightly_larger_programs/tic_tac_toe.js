@@ -22,7 +22,6 @@
 //    - Create a board using horizontal and vertical lines
 //      - line
 
-
 let read = require("readline-sync");
 
 const INITIAL_MARKER = " ";
@@ -61,12 +60,28 @@ function emptySquares(board) {
   return Object.keys(board).filter((key) => board[key] === INITIAL_MARKER);
 }
 
+function joinOr(list, sep = ", ", conjunction = "or") {
+  switch (list.length) {
+    case 0:
+      return "";
+    case 1:
+      return list[0];
+    case 2:
+      return list.join(` ${conjunction} `);
+    default:
+      return (
+        list.slice(0, list.length - 1).join(sep) +
+        ` ${conjunction} ${list[list.length - 1]}`
+      );
+  }
+}
+
 function playerChoosesSquare(board) {
   let square;
 
   while (true) {
     square = read
-      .question(`Pick a square (${emptySquares(board).join(",")}): `)
+      .question(`Pick a square (${joinOr(emptySquares(board))}): `)
       .trim();
 
     if (emptySquares(board).includes(square)) break;
