@@ -28,6 +28,8 @@ const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
 
 function displayBoard(board) {
+  console.clear();
+  
   console.log("");
   console.log(" _______ _______ _______ ");
   console.log("|       |       |       |");
@@ -78,6 +80,14 @@ function computerChoosesSquare(board) {
   board[square] = COMPUTER_MARKER;
 }
 
+function fullBoard(board) {
+  return emptySquares(board).length === 0;
+}
+
+function someoneWon(board) {
+  return false;
+}
+
 // Let the game begin!
 console.log("\nWelcome to Tic Tac Toe!");
 
@@ -88,12 +98,12 @@ while (true) {
   displayBoard(board);
 
   // Inner loop
-  while (emptySquares(board).length > 0) {
+  while (true) {
     playerChoosesSquare(board);
-    displayBoard(board);
-
     computerChoosesSquare(board);
     displayBoard(board);
+
+    if (someoneWon(board) || fullBoard(board)) break;
   }
 
   let answer = read.question("Do you want to play again (y/n)? ");
