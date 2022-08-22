@@ -27,13 +27,11 @@ let read = require("readline-sync");
 const INITIAL_MARKER = " ";
 const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
+const GAMES_TO_WIN = 3;
 
 function displayBoard(board) {
-  console.clear();
-
   console.log(`You are ${PLAYER_MARKER}, computer is ${COMPUTER_MARKER}`);
 
-  console.log("");
   console.log(" _______ _______ _______ ");
   console.log("|       |       |       |");
   console.log(`|   ${board["1"]}   |   ${board["2"]}   |   ${board["3"]}   |`);
@@ -83,6 +81,7 @@ function playerChoosesSquare(board) {
     square = read
       .question(`Pick a square (${joinOr(emptySquares(board))}): `)
       .trim();
+    console.log("\n\n");
 
     if (emptySquares(board).includes(square)) break;
 
@@ -132,30 +131,66 @@ function detectWinner(board) {
   return null;
 }
 
+function updateScore(score, winner) {
+  score[winner] += 1;
+}
+
+function displayScore(score) {
+  console.log("\nCurrent score:");
+  console.log(`Player: ${score.Player}`);
+  console.log(`Computer: ${score.Computer}`);
+}
+
+function displayRound(round) {
+  console.log("____________\n");
+  console.log(`Round ${round}`);
+  console.log("____________\n");
+}
+
 // Let the game begin!
-
-// Outer loop
+console.log("Welcome to Tic Tac Toe!");
+// Match loop
 while (true) {
-  let board = newBoard();
-  displayBoard(board);
+  console.log("Let's play best of 5 games!");
+  let score = { Player: 0, Computer: 0 };
+  let round = 1;
 
-  // Inner loop
+  // Game outer loop
   while (true) {
+    let board = newBoard();
+    displayRound(round);
+
+    // Game inner loop
+    while (true) {
+      displayBoard(board);
+
+      playerChoosesSquare(board);
+      if (someoneWon(board)) break;
+
+      computerChoosesSquare(board);
+      if (someoneWon(board) || fullBoard(board)) break;
+    }
+
+    round += 1;
     displayBoard(board);
 
-    playerChoosesSquare(board);
-    if (someoneWon(board)) break;
+    if (someoneWon(board)) {
+      let winner = detectWinner(board);
+      updateScore(score, winner);
+      console.log(`${winner} won the game!`);
+    } else {
+      console.log("It's a tie!");
+    }
 
-    computerChoosesSquare(board);
-    if (someoneWon(board) || fullBoard(board)) break;
+    displayScore(score);
+
+    if (Object.values(score).includes(GAMES_TO_WIN)) break;
   }
 
-  displayBoard(board);
-
-  if (someoneWon(board)) {
-    console.log(`\n${detectWinner(board)} won!`);
-  } else {
-    console.log("\nIt's a tie!");
+  if (score.Player === GAMES_TO_WIN) {
+    console.log("\nCONGRATULATIONS, YOU ARE THE MATCH WINNER!");
+  } else if (score.Computer === GAMES_TO_WIN) {
+    console.log("\nCOMPUTER IS THE MATCH WINNER!");
   }
 
   let answer = read.question("\nDo you want to play again (y/n)? ").trim();
