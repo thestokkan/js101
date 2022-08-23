@@ -24,10 +24,21 @@
 
 let read = require("readline-sync");
 
+const FIRST_PLAYER = "Computer";
 const INITIAL_MARKER = " ";
 const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
 const GAMES_TO_WIN = 3;
+const WINNING_LINES = [
+  [1, 2, 3],
+  [4, 5, 6],
+  [7, 8, 9],
+  [1, 4, 7],
+  [2, 5, 8],
+  [3, 6, 9],
+  [1, 5, 9],
+  [3, 5, 7],
+];
 
 function displayBoard(board) {
   console.log(`You are ${PLAYER_MARKER}, computer is ${COMPUTER_MARKER}`);
@@ -94,20 +105,9 @@ function playerChoosesSquare(board) {
 // If the player has two in a row, the computer picks the last square in that row
 // Else, the computer picks a square at random
 function findBestSquare(board, marker) {
-  let winningLines = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9],
-    [1, 4, 7],
-    [2, 5, 8],
-    [3, 6, 9],
-    [1, 5, 9],
-    [3, 5, 7],
-  ];
-
-  // Loop through winningLines array
-  for (let line = 0; line < winningLines.length; line++) {
-    let [sq1, sq2, sq3] = winningLines[line];
+  // Loop through WINNING_LINES array
+  for (let line = 0; line < WINNING_LINES.length; line++) {
+    let [sq1, sq2, sq3] = WINNING_LINES[line];
 
     if (
       board[sq1] === marker &&
@@ -161,20 +161,9 @@ function someoneWon(board) {
 }
 
 function detectWinner(board) {
-  let winningLines = [
-    [1, 2, 3],
-    [4, 5, 6],
-    [7, 8, 9],
-    [1, 4, 7],
-    [2, 5, 8],
-    [3, 6, 9],
-    [1, 5, 9],
-    [3, 5, 7],
-  ];
-
-  // Loop through winningLines array
-  for (let line = 0; line < winningLines.length; line++) {
-    let [sq1, sq2, sq3] = winningLines[line];
+  // Loop through WINNING_LINES array
+  for (let line = 0; line < WINNING_LINES.length; line++) {
+    let [sq1, sq2, sq3] = WINNING_LINES[line];
 
     if (board[sq1] === board[sq2] && board[sq2] === board[sq3]) {
       if (board[sq1] === PLAYER_MARKER) return "Player";
@@ -206,6 +195,7 @@ console.log("Welcome to Tic Tac Toe!");
 // Match loop
 while (true) {
   console.log("Let's play best of 5 games!");
+  console.log(`${FIRST_PLAYER} begins.`);
   let score = { Player: 0, Computer: 0 };
   let round = 1;
 
@@ -215,14 +205,28 @@ while (true) {
     displayRound(round);
 
     // Game inner loop
-    while (true) {
-      displayBoard(board);
+    if (FIRST_PLAYER === "Player") {
+      while (true) {
+        displayBoard(board);
 
-      playerChoosesSquare(board);
-      if (someoneWon(board)) break;
+        playerChoosesSquare(board);
+        if (someoneWon(board)) break;
 
-      computerChoosesSquare(board);
-      if (someoneWon(board) || fullBoard(board)) break;
+        computerChoosesSquare(board);
+        if (someoneWon(board) || fullBoard(board)) break;
+      }
+    }
+
+    if (FIRST_PLAYER === "Computer") {
+      while (true) {
+        computerChoosesSquare(board);
+        if (someoneWon(board)) break;
+
+        displayBoard(board);
+
+        playerChoosesSquare(board);
+        if (someoneWon(board) || fullBoard(board)) break;
+      }
     }
 
     round += 1;
@@ -248,7 +252,12 @@ while (true) {
   }
 
   let answer = read.question("\nDo you want to play again (y/n)? ").trim();
-  if (answer.toLowerCase() !== "y") break;
+
+  while (true) {
+    if (["y", "yes", "n", "no"].includes(answer.toLowerCase())) break;
+    console.log("Incorrect input.");
+  }
+  if (["n", "no"].includes(answer.toLowerCase())) break;
 }
 
 console.log("\nThanks for playing!");
