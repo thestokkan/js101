@@ -90,10 +90,58 @@ function playerChoosesSquare(board) {
   board[square] = PLAYER_MARKER;
 }
 
-function computerChoosesSquare(board) {
-  randIndex = Math.floor(Math.random() * emptySquares(board).length);
+// Computer AI: defense
+// If the player has two in a row, the computer picks the last square in that row
+// Else, the computer picks a square at random
+function getDefenseSquare(board) {
+  let winningLines = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [1, 4, 7],
+    [2, 5, 8],
+    [3, 6, 9],
+    [1, 5, 9],
+    [3, 5, 7],
+  ];
 
-  let square = emptySquares(board)[randIndex];
+  // Loop through winningLines array
+  for (let line = 0; line < winningLines.length; line++) {
+    let [sq1, sq2, sq3] = winningLines[line];
+
+    if (
+      board[sq1] === PLAYER_MARKER &&
+      board[sq2] === PLAYER_MARKER &&
+      board[sq3] === INITIAL_MARKER
+    ) {
+      return sq3;
+    } else if (
+      board[sq2] === PLAYER_MARKER &&
+      board[sq3] === PLAYER_MARKER &&
+      board[sq1] === INITIAL_MARKER
+    ) {
+      return sq1;
+    } else if (
+      board[sq1] === PLAYER_MARKER &&
+      board[sq3] === PLAYER_MARKER &&
+      board[sq2] === INITIAL_MARKER
+    ) {
+      return sq2;
+    }
+  }
+
+  return null;
+}
+
+function computerChoosesSquare(board) {
+  let square;
+
+  if (getDefenseSquare(board)) {
+    square = getDefenseSquare(board);
+  } else {
+    randIndex = Math.floor(Math.random() * emptySquares(board).length);
+    square = emptySquares(board)[randIndex];
+  }
 
   board[square] = COMPUTER_MARKER;
 }
