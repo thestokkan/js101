@@ -24,7 +24,7 @@
 
 let read = require("readline-sync");
 
-const FIRST_PLAYER = "Computer";
+const FIRST_PLAYER = "choose";
 const INITIAL_MARKER = " ";
 const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
@@ -40,6 +40,15 @@ const WINNING_LINES = [
   [3, 5, 7],
 ];
 
+function newBoard() {
+  let board = {};
+
+  for (let square = 1; square <= 9; square++) {
+    board[square] = INITIAL_MARKER;
+  }
+  return board;
+}
+
 function displayBoard(board) {
   console.log(`You are ${PLAYER_MARKER}, computer is ${COMPUTER_MARKER}`);
 
@@ -54,15 +63,6 @@ function displayBoard(board) {
   console.log(`|   ${board["7"]}   |   ${board["8"]}   |   ${board["9"]}   |`);
   console.log("|_______|_______|_______|");
   console.log("");
-}
-
-function newBoard() {
-  let board = {};
-
-  for (let square = 1; square <= 9; square++) {
-    board[square] = INITIAL_MARKER;
-  }
-  return board;
 }
 
 function emptySquares(board) {
@@ -190,14 +190,43 @@ function displayRound(round) {
   console.log("____________\n");
 }
 
+function getFirstPlayer() {
+  if (FIRST_PLAYER === "Player") return "Player";
+  if (FIRST_PLAYER === "Computer") return "Computer";
+
+  while (true) {
+    answer = read.question("Who shall go first, 1) player or 2) computer?\n");
+    if (answer === "1") return "Player";
+    if (answer === "2") return "Computer";
+
+    console.log("Invalid input");
+  }
+}
+
+function alternatePlayer(currentPlayer) {
+  if (currentPlayer === "Player") return "Computer";
+  if (currentPlayer === "Computer") return "Player";
+}
+
+function chooseSquare(board, currentPlayer) {
+  if (currentPlayer === "Player") {
+    playerChoosesSquare(board);
+  } else if (currentPlayer === "Computer") {
+    computerChoosesSquare(board);
+  }
+}
+
 // Let the game begin!
 console.log("Welcome to Tic Tac Toe!");
+
 // Match loop
 while (true) {
   console.log("Let's play best of 5 games!");
-  console.log(`${FIRST_PLAYER} begins.`);
   let score = { Player: 0, Computer: 0 };
   let round = 1;
+  let currentPlayer = getFirstPlayer();
+
+  console.log(`${currentPlayer} begins.`);
 
   // Game outer loop
   while (true) {
@@ -205,28 +234,11 @@ while (true) {
     displayRound(round);
 
     // Game inner loop
-    if (FIRST_PLAYER === "Player") {
-      while (true) {
-        displayBoard(board);
-
-        playerChoosesSquare(board);
-        if (someoneWon(board)) break;
-
-        computerChoosesSquare(board);
-        if (someoneWon(board) || fullBoard(board)) break;
-      }
-    }
-
-    if (FIRST_PLAYER === "Computer") {
-      while (true) {
-        computerChoosesSquare(board);
-        if (someoneWon(board)) break;
-
-        displayBoard(board);
-
-        playerChoosesSquare(board);
-        if (someoneWon(board) || fullBoard(board)) break;
-      }
+    while (true) {
+      displayBoard(board);
+      chooseSquare(board, currentPlayer);
+      currentPlayer = alternatePlayer(currentPlayer);
+      if (someoneWon(board) || fullBoard(board)) break;
     }
 
     round += 1;
