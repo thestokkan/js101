@@ -17,11 +17,6 @@
 // 9. If yes, go to #1
 // 10. If no, quit
 
-// In detail:
-// 1. Set up and display the board
-//    - Create a board using horizontal and vertical lines
-//      - line
-
 let read = require("readline-sync");
 
 const FIRST_PLAYER = "choose";
@@ -101,35 +96,21 @@ function playerChoosesSquare(board) {
   board[square] = PLAYER_MARKER;
 }
 
-// Computer AI: defense
-// If the player has two in a row, the computer picks the last square in that row
-// Else, the computer picks a square at random
 function findBestSquare(board, marker) {
   // Loop through WINNING_LINES array
-  for (let line = 0; line < WINNING_LINES.length; line++) {
-    let [sq1, sq2, sq3] = WINNING_LINES[line];
+  for (let i = 0; i < WINNING_LINES.length; i++) {
+    let line = WINNING_LINES[i];
+    let markersInLine = line.map((square) => board[square]);
 
-    if (
-      board[sq1] === marker &&
-      board[sq2] === marker &&
-      board[sq3] === INITIAL_MARKER
-    ) {
-      return sq3;
-    } else if (
-      board[sq2] === marker &&
-      board[sq3] === marker &&
-      board[sq1] === INITIAL_MARKER
-    ) {
-      return sq1;
-    } else if (
-      board[sq1] === marker &&
-      board[sq3] === marker &&
-      board[sq2] === INITIAL_MARKER
-    ) {
-      return sq2;
+    // Filter for rows with two equal markers
+    if (markersInLine.filter((val) => val === marker).length === 2) {
+      // If the last square is unused, return the square number
+      let unusedSquare = line.find(
+        (square) => board[square] === INITIAL_MARKER
+      );
+      if (unusedSquare !== undefined) return unusedSquare;
     }
   }
-
   return null;
 }
 
