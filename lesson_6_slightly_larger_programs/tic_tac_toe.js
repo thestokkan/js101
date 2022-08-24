@@ -160,15 +160,13 @@ function updateScore(score, winner) {
 }
 
 function displayScore(score) {
-  console.log("\nCurrent score:");
-  console.log(`Player: ${score.Player}`);
-  console.log(`Computer: ${score.Computer}`);
+  console.log(`Player: ${score.Player}    Computer: ${score.Computer}`);
 }
 
 function displayRound(round) {
-  console.log("____________\n");
+  console.log("\n-------");
   console.log(`Round ${round}`);
-  console.log("____________\n");
+  console.log("-------");
 }
 
 function getFirstPlayer() {
@@ -212,11 +210,15 @@ while (true) {
   // Game outer loop
   while (true) {
     let board = newBoard();
-    displayRound(round);
 
     // Game inner loop
     while (true) {
+      console.clear();
+
+      displayRound(round);
+      displayScore(score);
       displayBoard(board);
+
       chooseSquare(board, currentPlayer);
       currentPlayer = alternatePlayer(currentPlayer);
       if (someoneWon(board) || fullBoard(board)) break;
@@ -233,15 +235,21 @@ while (true) {
       console.log("It's a tie!");
     }
 
-    displayScore(score);
+    if (Object.values(score).includes(GAMES_TO_WIN)) {
+      console.clear();
 
-    if (Object.values(score).includes(GAMES_TO_WIN)) break;
-  }
+      displayBoard(board);
 
-  if (score.Player === GAMES_TO_WIN) {
-    console.log("\nCONGRATULATIONS, YOU ARE THE MATCH WINNER!");
-  } else if (score.Computer === GAMES_TO_WIN) {
-    console.log("\nCOMPUTER IS THE MATCH WINNER!");
+      if (score.Player === GAMES_TO_WIN) {
+        console.log("CONGRATULATIONS, YOU ARE THE MATCH WINNER!");
+      } else if (score.Computer === GAMES_TO_WIN) {
+        console.log("COMPUTER IS THE MATCH WINNER!");
+      }
+
+      console.log("\nFINAL SCORE:");
+      displayScore(score);
+      break;
+    }
   }
 
   let answer = read.question("\nDo you want to play again (y/n)? ").trim();
