@@ -98,8 +98,8 @@ function playerChoosesSquare(board) {
 
 function findBestSquare(board, marker) {
   // Loop through WINNING_LINES array
-  for (let i = 0; i < WINNING_LINES.length; i++) {
-    let line = WINNING_LINES[i];
+  for (let idx = 0; idx < WINNING_LINES.length; idx++) {
+    let line = WINNING_LINES[idx];
     let markersInLine = line.map((square) => board[square]);
 
     // Filter for rows with two equal markers
@@ -126,7 +126,7 @@ function computerChoosesSquare(board) {
   } else if (board[5] === INITIAL_MARKER) {
     square = 5;
   } else {
-    randIndex = Math.floor(Math.random() * emptySquares(board).length);
+    let randIndex = Math.floor(Math.random() * emptySquares(board).length);
     square = emptySquares(board)[randIndex];
   }
 
@@ -174,7 +174,9 @@ function getFirstPlayer() {
   if (FIRST_PLAYER === "Computer") return "Computer";
 
   while (true) {
-    answer = read.question("Who shall go first, 1) player or 2) computer?\n");
+    let answer = read.question(
+      "Who shall go first, 1) player or 2) computer?\n"
+    );
     if (answer === "1") return "Player";
     if (answer === "2") return "Computer";
 
@@ -184,7 +186,7 @@ function getFirstPlayer() {
 
 function alternatePlayer(currentPlayer) {
   if (currentPlayer === "Player") return "Computer";
-  if (currentPlayer === "Computer") return "Player";
+  return "Player";
 }
 
 function chooseSquare(board, currentPlayer) {

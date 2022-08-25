@@ -73,7 +73,7 @@
 
 // CODE
 // Setup
-let read = require("readline-sync");
+const read = require("readline-sync");
 
 const TWENTY_ONE = 21;
 const DEALER_LIMIT = 17;
@@ -113,29 +113,21 @@ function newDeck() {
 function updateCardTotal(hand) {
   // Reset cardTotal
   hand.cardTotal = 0;
-  // Filter out values that are not Aces
-  let noAceCards = Object.entries(hand.cards).filter(
-    (card) => !card[0].includes("Ace")
-  );
+  let values = Object.entries(hand.cards);
 
-  // Sum up all but Aces
-  noAceCards.forEach((card) => {
+  // Sum up all cards
+  values.forEach((card) => {
     hand.cardTotal += card[1];
   });
 
-  // Add Aces depending on sum
-  let aces = Object.entries(hand.cards).filter((card) =>
-    card[0].includes("Ace")
-  );
-
-  if (aces[0]) {
-    aces.forEach((ace) => {
-      if (hand.cardTotal > 10) {
-        ace[1] = 1;
+  // Correct for aces
+  values
+    .filter((card) => card[0].includes("Ace"))
+    .forEach((_) => {
+      if (hand.cardTotal > 21) {
+        hand.cardTotal -= 10;
       }
-      hand.cardTotal += ace[1];
     });
-  }
 }
 
 function displayHand(hand) {
