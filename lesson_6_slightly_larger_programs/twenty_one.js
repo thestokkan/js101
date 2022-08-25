@@ -79,8 +79,8 @@ const TWENTY_ONE = 21;
 const DEALER_LIMIT = 17;
 
 let deck = {};
-let player = { cardTotal: 0, cards: {} };
-let dealer = { cardTotal: 0, cards: {} };
+let player;
+let dealer;
 
 function newDeck() {
   let cardValues = [
@@ -140,12 +140,12 @@ function updateCardTotal(hand) {
 
 function displayHand(hand) {
   if (hand === player) {
-    console.log("You have:");
+    console.log("Your cards:");
     Object.entries(player.cards).forEach((card) => console.log(card[0]));
-    console.log(`Sum of cards: ${player.cardTotal}`);
+    console.log("");
   } else if (hand === dealer) {
     let dealerCard = Object.entries(dealer.cards)[0][0];
-    console.log(`Dealer has: ${dealerCard} and unknown card`);
+    console.log(`Dealer's cards: ${dealerCard} and unknown card\n`);
   } else {
     console.log("Invalid argument");
   }
@@ -172,7 +172,30 @@ function bustOrWin(hand) {
   return null;
 }
 
+function playerTurn(deck, player, dealer) {
+  console.log("YOUR TURN");
+
+  while (!bustOrWin(player)) {
+    let answer = read.question("\nHit or stay (h/s)? ");
+    if (answer === "s") {
+      console.log("You stay\n");
+      break;
+    }
+    if (answer === "h") {
+      dealCard(deck, player);
+      updateCardTotal(player);
+    } else {
+      console.log("Invalid input");
+    }
+    console.clear();
+    console.log("YOUR TURN");
+    displayHand(dealer);
+    displayHand(player);
+  }
+}
+
 function dealerTurn(deck, dealer) {
+  console.log("\nDEALER TURN");
   while (dealer.cardTotal < 17) {
     dealCard(deck, dealer);
     console.log("Dealer hits");
@@ -183,52 +206,56 @@ function dealerTurn(deck, dealer) {
   console.log("Dealer stays");
 }
 
-function playerTurn(deck, player) {
-  while (!bustOrWin(player)) {
-    displayHand(player);
-    let answer = read.question("Hit or stay (h/s)? ");
-    if (answer === "s") {
-      console.log("Player stays");
+// Game loop
+while (true) {
+  console.clear();
+  console.log("LET'S PLAY TWENTY-ONE!\n");
+
+  deck = newDeck();
+  player = { cardTotal: 0, cards: {} };
+  dealer = { cardTotal: 0, cards: {} };
+
+  dealFirstHand(deck, dealer);
+  dealFirstHand(deck, player);
+
+  console.log("STARTING HAND");
+  displayHand(dealer);
+  displayHand(player);
+
+  while (true) {
+    playerTurn(deck, player, dealer);
+    if (bustOrWin(player)) {
+      console.log(`\nYour total is ${player.cardTotal}!`);
+      console.log(`YOU ${bustOrWin(player)}!`);
       break;
     }
-    if (answer === "h") {
-      dealCard(deck, player);
-      updateCardTotal(player);
-    } else {
-      console.log("Invalid input");
+
+    dealerTurn(deck, dealer);
+    if (bustOrWin(dealer)) {
+      console.log(`\nDealer's total is ${dealer.cardTotal}!`);
+      console.log(`DEALER ${bustOrWin(dealer)}S!`);
+      break;
     }
-  }
-}
 
-// Game loop test
-deck = newDeck();
-dealFirstHand(deck, dealer);
-dealFirstHand(deck, player);
-displayHand(dealer);
+    console.log(`\nYour total: ${player.cardTotal}`);
+    console.log(`Dealer's total: ${dealer.cardTotal}`);
 
-while (true) {
-  playerTurn(deck, player);
-  if (bustOrWin(player)) {
-    console.log(`\nYour total is ${player.cardTotal}`);
-    console.log(`You ${bustOrWin(player)}!`);
+    if (player.cardTotal > dealer.cardTotal) {
+      console.log("YOU WIN!");
+    } else {
+      console.log("YOU LOSE...");
+    }
+
     break;
   }
 
-  dealerTurn(deck, dealer);
-  if (bustOrWin(dealer)) {
-    console.log(`\nDealer's total is ${dealer.cardTotal}`);
-    console.log(`Dealer ${bustOrWin(dealer)}S!`);
-    break;
+  let again = read.question("\nDo you want to play again (y/n)? ").trim();
+
+  while (true) {
+    if (["y", "yes", "n", "no"].includes(again.toLowerCase())) break;
+    console.log("Incorrect input.");
   }
-
-  console.log(`\nYour total: ${player.cardTotal}`);
-  console.log(`Dealer's total: ${dealer.cardTotal}`);
-
-  if (player.cardTotal > dealer.cardTotal) {
-    console.log("YOU WIN!");
-  } else {
-    console.log("YOU LOSE...");
-  }
-
-  break;
+  if (["n", "no"].includes(again.toLowerCase())) break;
 }
+
+console.log("Thanks for playing Twenty-One!");
