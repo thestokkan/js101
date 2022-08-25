@@ -75,125 +75,121 @@
 // Setup
 const read = require("readline-sync");
 
-const TWENTY_ONE = 21;
 const DEALER_LIMIT = 17;
 
-let deck = {};
-let player;
-let dealer;
+let deck;
+let playerHand;
+let dealerHand;
 
 function newDeck() {
   let cardValues = [
-    ["1", 1],
-    ["2", 2],
-    ["3", 3],
-    ["4", 4],
-    ["5", 5],
-    ["6", 6],
-    ["7", 7],
-    ["8", 8],
-    ["9", 9],
-    ["10", 10],
-    ["Jack", 10],
-    ["Queen", 10],
-    ["King", 10],
-    ["Ace", 11],
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "Jack",
+    "Queen",
+    "King",
+    "Ace",
   ];
   let suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
-  let cards = {};
+  let cards = [];
 
   suits.forEach((suit) => {
     cardValues.forEach((value) => {
-      cards[`${value[0]} of ${suit}`] = value[1];
+      cards.push([suit, value]);
     });
   });
   return cards;
 }
 
-function updateCardTotal(hand) {
-  // Reset cardTotal
-  hand.cardTotal = 0;
-  let values = Object.entries(hand.cards);
+function cardTotal(hand) {
+  let sum = 0;
+  let values = hand.map((card) => card[1]);
 
-  // Sum up all cards
-  values.forEach((card) => {
-    hand.cardTotal += card[1];
+  values.forEach((value) => {
+    if (value === "Ace") {
+      sum += 11;
+    } else if (["Jack", "Queen", "King"].includes(value)) {
+      sum += 10;
+    } else {
+      sum += Number(value);
+    }
   });
 
   // Correct for aces
   values
-    .filter((card) => card[0].includes("Ace"))
+    .filter((value) => value === "Ace")
     .forEach((_) => {
-      if (hand.cardTotal > 21) {
-        hand.cardTotal -= 10;
-      }
+      if (sum > 21) sum -= 10;
     });
+
+  return sum;
 }
 
 function displayHand(hand) {
-  if (hand === player) {
+  if (hand === playerHand) {
     console.log("Your cards:");
-    Object.entries(player.cards).forEach((card) => console.log(card[0]));
+    playerHand.forEach((card) => console.log(`${card[1]} of ${card[0]}`));
     console.log("");
-  } else if (hand === dealer) {
-    let dealerCard = Object.entries(dealer.cards)[0][0];
-    console.log(`Dealer's cards: ${dealerCard} and unknown card\n`);
+  } else if (hand === dealerHand) {
+    let card = dealerHand[0];
+    console.log(`Dealer's cards: ${card[1]} of ${card[0]} and unknown card\n`);
   } else {
     console.log("Invalid argument");
   }
 }
 
 function dealCard(deck, hand) {
-  let randIndex = Math.floor(Math.random() * Object.keys(deck).length);
-  let card = Object.keys(deck)[randIndex];
-
-  hand.cards[card] = deck[card];
-  delete deck[card];
+  let cardIndex = Math.floor(Math.random() * deck.length);
+  hand.push(deck[cardIndex]);
+  deck.splice(cardIndex, 1);
 }
 
 function dealFirstHand(deck, hand) {
   dealCard(deck, hand);
   dealCard(deck, hand);
-
-  updateCardTotal(hand);
 }
 
-function bustOrWin(hand) {
-  if (hand.cardTotal === 21) return "WIN";
-  if (hand.cardTotal > 21) return "BUST";
-  return null;
+function bust(hand) {
+  return cardTotal(hand) > 21;
 }
 
-function playerTurn(deck, player, dealer) {
+function playerTurn(deck, playerHand, dealerHand) {
   console.log("YOUR TURN");
 
-  while (!bustOrWin(player)) {
+  while (!bust(playerHand)) {
     let answer = read.question("\nHit or stay (h/s)? ");
     if (answer === "s") {
       console.log("You stay\n");
       break;
     }
     if (answer === "h") {
-      dealCard(deck, player);
-      updateCardTotal(player);
+      console.log("Hit\n");
+      dealCard(deck, playerHand);
     } else {
       console.log("Invalid input");
     }
     console.clear();
     console.log("YOUR TURN");
-    displayHand(dealer);
-    displayHand(player);
+    displayHand(dealerHand);
+    displayHand(playerHand);
   }
 }
 
-function dealerTurn(deck, dealer) {
+function dealerTurn(deck, dealerHand) {
   console.log("\nDEALER TURN");
-  while (dealer.cardTotal < 17) {
-    dealCard(deck, dealer);
+  while (cardTotal(dealerHand) <= DEALER_LIMIT) {
     console.log("Dealer hits");
-    updateCardTotal(dealer);
+    dealCard(deck, dealerHand);
 
-    if (bustOrWin(dealer)) break;
+    if (bust(dealerHand)) break;
   }
   console.log("Dealer stays");
 }
@@ -204,38 +200,40 @@ while (true) {
   console.log("LET'S PLAY TWENTY-ONE!\n");
 
   deck = newDeck();
-  player = { cardTotal: 0, cards: {} };
-  dealer = { cardTotal: 0, cards: {} };
+  playerHand = [];
+  dealerHand = [];
 
-  dealFirstHand(deck, dealer);
-  dealFirstHand(deck, player);
+  dealFirstHand(deck, dealerHand);
+  dealFirstHand(deck, playerHand);
 
   console.log("STARTING HAND");
-  displayHand(dealer);
-  displayHand(player);
+  displayHand(dealerHand);
+  displayHand(playerHand);
 
   while (true) {
-    playerTurn(deck, player, dealer);
-    if (bustOrWin(player)) {
-      console.log(`\nYour total is ${player.cardTotal}!`);
-      console.log(`YOU ${bustOrWin(player)}!`);
+    playerTurn(deck, playerHand, dealerHand);
+    if (bust(playerHand)) {
+      console.log(`\nYour total is ${cardTotal(playerHand)}!`);
+      console.log("YOU BUST!");
       break;
     }
 
-    dealerTurn(deck, dealer);
-    if (bustOrWin(dealer)) {
-      console.log(`\nDealer's total is ${dealer.cardTotal}!`);
-      console.log(`DEALER ${bustOrWin(dealer)}S!`);
+    dealerTurn(deck, dealerHand);
+    if (bust(dealerHand)) {
+      console.log(`\nDealer's total is ${cardTotal(dealerHand)}!`);
+      console.log("DEALER BUSTS!");
       break;
     }
 
-    console.log(`\nYour total: ${player.cardTotal}`);
-    console.log(`Dealer's total: ${dealer.cardTotal}`);
+    console.log(`\nYour total: ${cardTotal(playerHand)}`);
+    console.log(`Dealer's total: ${cardTotal(dealerHand)}`);
 
-    if (player.cardTotal > dealer.cardTotal) {
+    if (cardTotal(playerHand) > cardTotal(dealerHand)) {
       console.log("YOU WIN!");
-    } else {
+    } else if (cardTotal(playerHand) < cardTotal(dealerHand)) {
       console.log("YOU LOSE...");
+    } else {
+      console.log("IT'S A TIE!");
     }
 
     break;
