@@ -194,6 +194,44 @@ function dealerTurn(deck, dealerHand) {
   console.log("Dealer stays");
 }
 
+function detectResults(dealerHand, playerHand) {
+  let dealerTotal = cardTotal(dealerHand);
+  let playerTotal = cardTotal(playerHand);
+
+  if (playerTotal > 21) {
+    return "PLAYER_BUST";
+  } else if (dealerTotal > 21) {
+    return "DEALER_BUST";
+  } else if (playerTotal > dealerTotal) {
+    return "PLAYER";
+  } else if (playerTotal < dealerTotal) {
+    return "DEALER";
+  } else {
+    return "TIE";
+  }
+}
+
+function displayResults(dealerHand, playerHand) {
+  let result = detectResults(dealerHand, playerHand);
+
+  switch (result) {
+    case "PLAYER_BUST":
+      console.log("You busted! Dealer wins!");
+      break;
+    case "DEALER_BUST":
+      console.log("Dealer busted! You win!");
+      break;
+    case "PLAYER":
+      console.log("You win!");
+      break;
+    case "DEALER":
+      console.log("Dealer wins!");
+      break;
+    case "TIE":
+      console.log("It's a tie!");
+  }
+}
+
 // Game loop
 while (true) {
   console.clear();
@@ -212,32 +250,16 @@ while (true) {
 
   while (true) {
     playerTurn(deck, playerHand, dealerHand);
-    if (bust(playerHand)) {
-      console.log(`\nYour total is ${cardTotal(playerHand)}!`);
-      console.log("YOU BUST!");
-      break;
-    }
+    if (bust(playerHand)) break;
 
     dealerTurn(deck, dealerHand);
-    if (bust(dealerHand)) {
-      console.log(`\nDealer's total is ${cardTotal(dealerHand)}!`);
-      console.log("DEALER BUSTS!");
-      break;
-    }
-
-    console.log(`\nYour total: ${cardTotal(playerHand)}`);
-    console.log(`Dealer's total: ${cardTotal(dealerHand)}`);
-
-    if (cardTotal(playerHand) > cardTotal(dealerHand)) {
-      console.log("YOU WIN!");
-    } else if (cardTotal(playerHand) < cardTotal(dealerHand)) {
-      console.log("YOU LOSE...");
-    } else {
-      console.log("IT'S A TIE!");
-    }
-
     break;
   }
+
+  console.log(`\nYour total: ${cardTotal(playerHand)}`);
+  console.log(`Dealer's total: ${cardTotal(dealerHand)}`);
+
+  displayResults(dealerHand, playerHand);
 
   let again = read.question("\nDo you want to play again (y/n)? ").trim();
 
