@@ -73,6 +73,8 @@
 
 // CODE
 // Setup
+let read = require("readline-sync");
+
 const TWENTY_ONE = 21;
 const DEALER_LIMIT = 17;
 
@@ -108,18 +110,6 @@ function newDeck() {
   return cards;
 }
 
-function dealCards(deck, hand) {
-  do {
-    let randIndex = Math.floor(Math.random() * Object.keys(deck).length);
-    let card = Object.keys(deck)[randIndex];
-
-    hand.cards[card] = deck[card];
-    delete deck[card];
-  } while (Object.entries(hand.cards).length < 2);
-}
-
-function setAceValue(hand) {}
-
 function updateCardTotal(hand) {
   // Reset cardTotal
   hand.cardTotal = 0;
@@ -148,27 +138,97 @@ function updateCardTotal(hand) {
   }
 }
 
-function displayPlayerHand(player) {
-  console.log("You have:");
-  Object.entries(player.cards).forEach((card) => console.log(card[0]));
-  console.log(`Sum of cards: ${player.cardTotal}`);
+function displayHand(hand) {
+  if (hand === player) {
+    console.log("You have:");
+    Object.entries(player.cards).forEach((card) => console.log(card[0]));
+    console.log(`Sum of cards: ${player.cardTotal}`);
+  } else if (hand === dealer) {
+    let dealerCard = Object.entries(dealer.cards)[0][0];
+    console.log(`Dealer has: ${dealerCard} and unknown card`);
+  } else {
+    console.log("Invalid argument");
+  }
 }
 
-function displayDealerHand(dealer) {
-  let dealerCard = Object.entries(dealer.cards)[0][0];
-  console.log(`Dealer has: ${dealerCard} and unknown card`);
+function dealCard(deck, hand) {
+  let randIndex = Math.floor(Math.random() * Object.keys(deck).length);
+  let card = Object.keys(deck)[randIndex];
+
+  hand.cards[card] = deck[card];
+  delete deck[card];
+}
+
+function dealFirstHand(deck, hand) {
+  dealCard(deck, hand);
+  dealCard(deck, hand);
+
+  updateCardTotal(hand);
+}
+
+function bustOrWin(hand) {
+  if (hand.cardTotal === 21) return "WIN";
+  if (hand.cardTotal > 21) return "BUST";
+  return null;
+}
+
+function dealerTurn(deck, dealer) {
+  while (dealer.cardTotal < 17) {
+    dealCard(deck, dealer);
+    console.log("Dealer hits");
+    updateCardTotal(dealer);
+
+    if (bustOrWin(dealer)) break;
+  }
+  console.log("Dealer stays");
+}
+
+function playerTurn(deck, player) {
+  while (!bustOrWin(player)) {
+    displayHand(player);
+    let answer = read.question("Hit or stay (h/s)? ");
+    if (answer === "s") {
+      console.log("Player stays");
+      break;
+    }
+    if (answer === "h") {
+      dealCard(deck, player);
+      updateCardTotal(player);
+    } else {
+      console.log("Invalid input");
+    }
+  }
 }
 
 // Game loop test
 deck = newDeck();
+dealFirstHand(deck, dealer);
+dealFirstHand(deck, player);
+displayHand(dealer);
 
-dealCards(deck, player);
-updateCardTotal(player);
-displayPlayerHand(player);
-console.log("");
-dealCards(deck, player);
-updateCardTotal(player);
-displayPlayerHand(player);
+while (true) {
+  playerTurn(deck, player);
+  if (bustOrWin(player)) {
+    console.log(`\nYour total is ${player.cardTotal}`);
+    console.log(`You ${bustOrWin(player)}!`);
+    break;
+  }
 
-// console.log(dealer);
-// displayDealerHand(dealer);
+  dealerTurn(deck, dealer);
+  if (bustOrWin(dealer)) {
+    console.log(`\nDealer's total is ${dealer.cardTotal}`);
+    console.log(`Dealer ${bustOrWin(dealer)}S!`);
+    break;
+  }
+
+  console.log(`\nYour total: ${player.cardTotal}`);
+  console.log(`Dealer's total: ${dealer.cardTotal}`);
+
+  if (player.cardTotal > dealer.cardTotal) {
+    console.log("YOU WIN!");
+  } else {
+    console.log("YOU LOSE...");
+  }
+
+  break;
+}
