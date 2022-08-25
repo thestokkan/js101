@@ -232,6 +232,17 @@ function displayResults(dealerHand, playerHand) {
   }
 }
 
+function playAgain() {
+  let again = read.question("\nDo you want to play again (y/n)? ").trim();
+
+  while (true) {
+    if (["y", "yes"].includes(again.toLowerCase())) return "y";
+    if (["n", "no"].includes(again.toLowerCase())) return null;
+    console.log("Incorrect input.");
+  }
+
+}
+
 // Game loop
 while (true) {
   console.clear();
@@ -261,13 +272,8 @@ while (true) {
 
   displayResults(dealerHand, playerHand);
 
-  let again = read.question("\nDo you want to play again (y/n)? ").trim();
-
-  while (true) {
-    if (["y", "yes", "n", "no"].includes(again.toLowerCase())) break;
-    console.log("Incorrect input.");
-  }
-  if (["n", "no"].includes(again.toLowerCase())) break;
+  
+  if (!playAgain()) break;
 }
 
 console.log("Thanks for playing Twenty-One!");
