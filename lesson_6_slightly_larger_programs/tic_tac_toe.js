@@ -44,7 +44,11 @@ function newBoard() {
   return board;
 }
 
-function displayBoard(board) {
+function displayBoard(board, round, score) {
+  console.clear();
+
+  displayRound(round);
+  displayScore(score);
   console.log(`You are ${PLAYER_MARKER}, computer is ${COMPUTER_MARKER}`);
 
   console.log(" _______ _______ _______ ");
@@ -97,14 +101,11 @@ function playerChoosesSquare(board) {
 }
 
 function findBestSquare(board, marker) {
-  // Loop through WINNING_LINES array
   for (let idx = 0; idx < WINNING_LINES.length; idx++) {
     let line = WINNING_LINES[idx];
     let markersInLine = line.map((square) => board[square]);
 
-    // Filter for rows with two equal markers
     if (markersInLine.filter((val) => val === marker).length === 2) {
-      // If the last square is unused, return the square number
       let unusedSquare = line.find(
         (square) => board[square] === INITIAL_MARKER
       );
@@ -142,7 +143,6 @@ function someoneWon(board) {
 }
 
 function detectWinner(board) {
-  // Loop through WINNING_LINES array
   for (let line = 0; line < WINNING_LINES.length; line++) {
     let [sq1, sq2, sq3] = WINNING_LINES[line];
 
@@ -197,15 +197,14 @@ function chooseSquare(board, currentPlayer) {
   }
 }
 
-// Let the game begin!
-console.log("Welcome to Tic Tac Toe!");
-
 // Match loop
 while (true) {
-  console.log("Let's play best of 5 games!");
+  console.clear();
+  console.log("Welcome to Tic Tac Toe!");
+  console.log("Let's play best of 5 games!\n");
   let score = { Player: 0, Computer: 0 };
-  let round = 1;
   let currentPlayer = getFirstPlayer();
+  let round = 1;
 
   console.log(`${currentPlayer} begins.`);
 
@@ -215,32 +214,29 @@ while (true) {
 
     // Game inner loop
     while (true) {
-      console.clear();
-
-      displayRound(round);
-      displayScore(score);
-      displayBoard(board);
+      displayBoard(board, round, score);
 
       chooseSquare(board, currentPlayer);
       currentPlayer = alternatePlayer(currentPlayer);
       if (someoneWon(board) || fullBoard(board)) break;
     }
 
-    round += 1;
-    displayBoard(board);
-
     if (someoneWon(board)) {
       let winner = detectWinner(board);
       updateScore(score, winner);
-      console.log(`${winner} won the game!`);
+      displayBoard(board, round, score);
+      console.log(`${winner} won round ${round}!`);
     } else {
       console.log("It's a tie!");
     }
 
+    round += 1;
+    read.question("\nPress any key to continue ");
+
     if (Object.values(score).includes(GAMES_TO_WIN)) {
       console.clear();
 
-      displayBoard(board);
+      displayBoard(board, round, score);
 
       if (score.Player === GAMES_TO_WIN) {
         console.log("CONGRATULATIONS, YOU ARE THE MATCH WINNER!");
@@ -254,9 +250,9 @@ while (true) {
     }
   }
 
-  let answer = read.question("\nDo you want to play again (y/n)? ").trim();
-
+  let answer;
   while (true) {
+    answer = read.question("\nDo you want to play again (y/n)? ");
     if (["y", "yes", "n", "no"].includes(answer.toLowerCase())) break;
     console.log("Incorrect input.");
   }
