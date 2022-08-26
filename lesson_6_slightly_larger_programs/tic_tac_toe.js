@@ -24,6 +24,8 @@ const INITIAL_MARKER = " ";
 const PLAYER_MARKER = "X";
 const COMPUTER_MARKER = "O";
 const GAMES_TO_WIN = 3;
+const CENTER_SQUARE = 5;
+const MAX_MARKERS_BEFORE_WIN = 2;
 const WINNING_LINES = [
   [1, 2, 3],
   [4, 5, 6],
@@ -105,7 +107,10 @@ function findBestSquare(board, marker) {
     let line = WINNING_LINES[idx];
     let markersInLine = line.map((square) => board[square]);
 
-    if (markersInLine.filter((val) => val === marker).length === 2) {
+    if (
+      markersInLine.filter((val) => val === marker).length ===
+      MAX_MARKERS_BEFORE_WIN
+    ) {
       let unusedSquare = line.find(
         (square) => board[square] === INITIAL_MARKER
       );
@@ -124,8 +129,8 @@ function computerChoosesSquare(board) {
     square = offenseSquare;
   } else if (defenseSquare) {
     square = defenseSquare;
-  } else if (board[5] === INITIAL_MARKER) {
-    square = 5;
+  } else if (board[CENTER_SQUARE] === INITIAL_MARKER) {
+    square = CENTER_SQUARE;
   } else {
     let randIndex = Math.floor(Math.random() * emptySquares(board).length);
     square = emptySquares(board)[randIndex];
@@ -143,16 +148,17 @@ function someoneWon(board) {
 }
 
 function detectWinner(board) {
+  let winner;
+
   for (let line = 0; line < WINNING_LINES.length; line++) {
     let [sq1, sq2, sq3] = WINNING_LINES[line];
 
     if (board[sq1] === board[sq2] && board[sq2] === board[sq3]) {
-      if (board[sq1] === PLAYER_MARKER) return "Player";
-      if (board[sq1] === COMPUTER_MARKER) return "Computer";
+      if (board[sq1] === PLAYER_MARKER) winner = "Player";
+      if (board[sq1] === COMPUTER_MARKER) winner = "Computer";
     }
   }
-
-  return null;
+  return winner;
 }
 
 function updateScore(score, winner) {
