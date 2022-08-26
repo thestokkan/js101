@@ -1,11 +1,13 @@
 // Rules of Twenty-One
 // - Deck: Start with std 52-card deck
 // - Goal: Get as close to 21 as possible without going over (bust = you lose)
-// - Setup: Two participants, dealer and player, are both dealt a hand of two cards. The player can se own cards and ONE of dealer's cards.
+// - Setup: Two participants, dealer and player, are both dealt a hand of two
+// cards. The player can se own cards and ONE of dealer's cards.
 // - Card values:
 //  - 2-10: face value
 //  - Jack, Queen, King: 10
-//  - Ace: 11 if total sum of cards doesn't exceed 21 (including the Ace), 1 otherwise.
+//  - Ace: 11 if total sum of cards doesn't exceed 21 (including the Ace),
+// 1 otherwise.
 // - Player turn: Player always goes first
 //  - Hit (dealth another card) or stay (no new card)
 //  - Player can hit as many times as (s)he wants
@@ -60,14 +62,12 @@
 // - Ask if hit or stay
 //  - IF hit, deal card
 //    - Calculate cardTotal
-//    - IF cardTotal = 21 => game over (win)
 //    - IF cardTotal > 21 => game over (lose)
 // - IF stay, end turn
 
 // Dealer turn
 // - Deal card
 //    - Calculate cardTotal
-//    - IF cardTotal = 21 => game over (win)
 //    - IF cardTotal > 21 => game over (lose)
 // - Repeat until cardTotal> 17 => stay (end turn)
 
@@ -80,25 +80,25 @@ const DEALER_LIMIT = 17;
 let deck;
 let playerHand;
 let dealerHand;
+let cardValues = [
+  "1",
+  "2",
+  "3",
+  "4",
+  "5",
+  "6",
+  "7",
+  "8",
+  "9",
+  "10",
+  "Jack",
+  "Queen",
+  "King",
+  "Ace",
+];
+let suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
 
-function newDeck() {
-  let cardValues = [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9",
-    "10",
-    "Jack",
-    "Queen",
-    "King",
-    "Ace",
-  ];
-  let suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+function newDeck(cardValues, suits) {
   let cards = [];
 
   suits.forEach((suit) => {
@@ -134,15 +134,22 @@ function cardTotal(hand) {
 }
 
 function displayHand(hand) {
+  let values = hand.map((card) => card[1]);
+  let valueString = `${values.slice(0, values.length - 1)} and ${values.slice(
+    values.length - 1
+  )}`;
+
   if (hand === playerHand) {
-    console.log("Your cards:");
-    playerHand.forEach((card) => console.log(`${card[1]} of ${card[0]}`));
-    console.log("");
+    console.log(`Your cards: ${valueString} (sum: ${cardTotal(playerHand)})`);
   } else if (hand === dealerHand) {
-    let card = dealerHand[0];
-    console.log(`Dealer's cards: ${card[1]} of ${card[0]} and unknown card\n`);
-  } else {
-    console.log("Invalid argument");
+    if (playerHand.length === 2) {
+      let card = dealerHand[0];
+      console.log(`Dealer's cards: ${card[1]} and unknown card`);
+    } else {
+      console.log(
+        `Dealer's cards: ${valueString} (sum: ${cardTotal(dealerHand)})`
+      );
+    }
   }
 }
 
@@ -162,7 +169,7 @@ function bust(hand) {
 }
 
 function playerTurn(deck, playerHand, dealerHand) {
-  console.log("YOUR TURN");
+  console.log("\nYOUR TURN");
 
   while (!bust(playerHand)) {
     let answer = read.question("\nHit or stay (h/s)? ");
@@ -179,19 +186,24 @@ function playerTurn(deck, playerHand, dealerHand) {
     console.clear();
     console.log("YOUR TURN");
     displayHand(dealerHand);
+    console.log("");
     displayHand(playerHand);
   }
 }
 
 function dealerTurn(deck, dealerHand) {
   console.log("\nDEALER TURN");
-  while (cardTotal(dealerHand) <= DEALER_LIMIT) {
-    console.log("Dealer hits");
-    dealCard(deck, dealerHand);
+  displayHand(dealerHand);
 
-    if (bust(dealerHand)) break;
+  while (cardTotal(dealerHand) <= DEALER_LIMIT) {
+    console.log("\nDealer hits");
+    dealCard(deck, dealerHand);
+    displayHand(dealerHand);
   }
-  console.log("Dealer stays");
+
+  if (!bust(dealerHand)) {
+    console.log("\nDealer stays");
+  }
 }
 
 function detectResults(dealerHand, playerHand) {
@@ -216,19 +228,19 @@ function displayResults(dealerHand, playerHand) {
 
   switch (result) {
     case "PLAYER_BUST":
-      console.log("You busted! Dealer wins!");
+      console.log("You busted!\nDEALER WINS!");
       break;
     case "DEALER_BUST":
-      console.log("Dealer busted! You win!");
+      console.log("Dealer busted!\nYOU WIN!");
       break;
     case "PLAYER":
-      console.log("You win!");
+      console.log("YOU WIN!");
       break;
     case "DEALER":
-      console.log("Dealer wins!");
+      console.log("DEALER WINS!");
       break;
     case "TIE":
-      console.log("It's a tie!");
+      console.log("IT'S A TIE!");
   }
 }
 
@@ -240,7 +252,6 @@ function playAgain() {
     if (["n", "no"].includes(again.toLowerCase())) return null;
     console.log("Incorrect input.");
   }
-
 }
 
 // Game loop
@@ -248,7 +259,7 @@ while (true) {
   console.clear();
   console.log("LET'S PLAY TWENTY-ONE!\n");
 
-  deck = newDeck();
+  deck = newDeck(cardValues, suits);
   playerHand = [];
   dealerHand = [];
 
@@ -257,6 +268,7 @@ while (true) {
 
   console.log("STARTING HAND");
   displayHand(dealerHand);
+  console.log("");
   displayHand(playerHand);
 
   while (true) {
@@ -267,12 +279,13 @@ while (true) {
     break;
   }
 
-  console.log(`\nYour total: ${cardTotal(playerHand)}`);
-  console.log(`Dealer's total: ${cardTotal(dealerHand)}`);
-
+  console.log("\n======================");
   displayResults(dealerHand, playerHand);
+  console.log("");
+  displayHand(dealerHand);
+  displayHand(playerHand);
+  console.log("======================\n");
 
-  
   if (!playAgain()) break;
 }
 
