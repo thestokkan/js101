@@ -203,6 +203,21 @@ function chooseSquare(board, currentPlayer) {
   }
 }
 
+function someoneWonMatch(score) {
+  return Object.values(score).includes(GAMES_TO_WIN);
+}
+
+function displayMatchScore(score) {
+  if (score.Player === GAMES_TO_WIN) {
+    console.log("CONGRATULATIONS, YOU ARE THE MATCH WINNER!");
+  } else if (score.Computer === GAMES_TO_WIN) {
+    console.log("COMPUTER IS THE MATCH WINNER!");
+  }
+
+  console.log("\nFINAL SCORE:");
+  displayScore(score);
+}
+
 // Match loop
 while (true) {
   console.clear();
@@ -239,19 +254,10 @@ while (true) {
     round += 1;
     read.question("\nPress any key to continue ");
 
-    if (Object.values(score).includes(GAMES_TO_WIN)) {
+    if (someoneWonMatch(score)) {
       console.clear();
-
       displayBoard(board, round, score);
-
-      if (score.Player === GAMES_TO_WIN) {
-        console.log("CONGRATULATIONS, YOU ARE THE MATCH WINNER!");
-      } else if (score.Computer === GAMES_TO_WIN) {
-        console.log("COMPUTER IS THE MATCH WINNER!");
-      }
-
-      console.log("\nFINAL SCORE:");
-      displayScore(score);
+      displayMatchScore(score);
       break;
     }
   }
