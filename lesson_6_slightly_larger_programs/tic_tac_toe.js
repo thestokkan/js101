@@ -218,6 +218,16 @@ function displayMatchScore(score) {
   displayScore(score);
 }
 
+function playAgain() {
+  let again;
+  while (true) {
+    again = read.question("\nDo you want to play again (y/n)? ");
+    if (["y", "yes"].includes(again.toLowerCase())) return "y";
+    if (["n", "no"].includes(again.toLowerCase())) return null;
+    console.log("Incorrect input.");
+  }
+}
+
 // Match loop
 while (true) {
   console.clear();
@@ -262,13 +272,7 @@ while (true) {
     }
   }
 
-  let answer;
-  while (true) {
-    answer = read.question("\nDo you want to play again (y/n)? ");
-    if (["y", "yes", "n", "no"].includes(answer.toLowerCase())) break;
-    console.log("Incorrect input.");
-  }
-  if (["n", "no"].includes(answer.toLowerCase())) break;
+  if (!playAgain()) break;
 }
 
 console.log("\nThanks for playing!");
