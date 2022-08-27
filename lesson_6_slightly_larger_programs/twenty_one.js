@@ -245,9 +245,9 @@ function displayResults(dealerHand, playerHand) {
 }
 
 function playAgain() {
-  let again = read.question("\nDo you want to play again (y/n)? ").trim();
-
+  let again;
   while (true) {
+    again = read.question("\nDo you want to play again (y/n)? ");
     if (["y", "yes"].includes(again.toLowerCase())) return "y";
     if (["n", "no"].includes(again.toLowerCase())) return null;
     console.log("Incorrect input.");

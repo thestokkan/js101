@@ -120,31 +120,37 @@ function findBestSquare(board, marker) {
   return null;
 }
 
+function emptyCenterSquare(board) {
+  return board[CENTER_SQUARE] === INITIAL_MARKER;
+}
+
+function randomSquare(board) {
+  let randIndex = Math.floor(Math.random() * emptySquares(board).length);
+  return emptySquares(board)[randIndex];
+}
+
+function computerChooses(board, square) {
+  board[square] = COMPUTER_MARKER;
+}
+
 function computerChoosesSquare(board) {
-  let square;
   let offenseSquare = findBestSquare(board, COMPUTER_MARKER);
   let defenseSquare = findBestSquare(board, PLAYER_MARKER);
 
   if (offenseSquare) {
-    square = offenseSquare;
+    computerChooses(board, offenseSquare);
   } else if (defenseSquare) {
-    square = defenseSquare;
-  } else if (board[CENTER_SQUARE] === INITIAL_MARKER) {
-    square = CENTER_SQUARE;
+    computerChooses(board, defenseSquare);
+  } else if (emptyCenterSquare(board)) {
+    computerChooses(board, CENTER_SQUARE);
   } else {
-    let randIndex = Math.floor(Math.random() * emptySquares(board).length);
-    square = emptySquares(board)[randIndex];
+    console.log(randomSquare(board));
+    computerChooses(board, randomSquare(board));
   }
-
-  board[square] = COMPUTER_MARKER;
 }
 
 function fullBoard(board) {
   return emptySquares(board).length === 0;
-}
-
-function someoneWon(board) {
-  return !!detectWinner(board);
 }
 
 function detectWinner(board) {
@@ -246,13 +252,12 @@ while (true) {
     // Game inner loop
     while (true) {
       displayBoard(board, round, score);
-
       chooseSquare(board, currentPlayer);
       currentPlayer = alternatePlayer(currentPlayer);
-      if (someoneWon(board) || fullBoard(board)) break;
+      if (detectWinner(board) || fullBoard(board)) break;
     }
 
-    if (someoneWon(board)) {
+    if (detectWinner(board)) {
       let winner = detectWinner(board);
       updateScore(score, winner);
       displayBoard(board, round, score);
