@@ -242,6 +242,36 @@ function displayResults(dealerTotal, playerTotal) {
   }
 }
 
+function updateMatchScore(dealerTotal, playerTotal, score) {
+  let result = detectResults(dealerTotal, playerTotal);
+  switch (result) {
+    case "PLAYER_BUST":
+      score.dealer += 1;
+      break;
+    case "DEALER_BUST":
+      score.player += 1;
+      break;
+    case "PLAYER":
+      score.player += 1;
+      break;
+    case "DEALER":
+      score.dealer += 1;
+      break;
+  }
+}
+
+function matchWinner(score) {
+  if (score.player > score.dealer) {
+    return "PLAYER";
+  } else {
+    return "DEALER";
+  }
+}
+
+function displayMatchScore(score) {
+  console.log(`Player: ${score.player}  Dealer: ${score.dealer}`);
+}
+
 function playAgain() {
   let again;
   while (true) {
@@ -252,41 +282,64 @@ function playAgain() {
   }
 }
 
+// Match loop
+
 // Game loop
 while (true) {
+  let round = 1;
+  let score = { player: 0, dealer: 0 };
+
   console.clear();
-  console.log("LET'S PLAY TWENTY-ONE!\n");
+  console.log("Welcome to TWENTY-ONE!\n");
+  console.log("*** Let's play best out of 5 ***\n\n");
 
-  deck = newDeck(cardValues, suits);
-  playerHand = [];
-  dealerHand = [];
+  while (!Object.values(score).includes(3)) {
+    read.question("\nPress <Enter> to continue");
+    console.clear();
+    console.log(`*** Round ${round} ***\n`);
 
-  dealFirstHand(deck, dealerHand);
-  dealFirstHand(deck, playerHand);
-  playerTotal = cardTotal(playerHand);
-  dealerTotal = cardTotal(dealerHand);
+    deck = newDeck(cardValues, suits);
+    playerHand = [];
+    dealerHand = [];
 
-  console.log("STARTING HAND");
-  displayHand(dealerHand, dealerTotal, (firstHand = true));
-  console.log("");
-  displayHand(playerHand, playerTotal);
-
-  while (true) {
-    playerTurn(deck, playerHand, playerTotal);
+    dealFirstHand(deck, dealerHand);
+    dealFirstHand(deck, playerHand);
     playerTotal = cardTotal(playerHand);
-    if (bust(playerTotal)) break;
-
-    dealerTurn(deck, dealerHand, dealerTotal);
     dealerTotal = cardTotal(dealerHand);
-    break;
-  }
 
-  console.log("\n======================");
-  displayResults(dealerTotal, playerTotal);
-  console.log("");
-  displayHand(dealerHand, dealerTotal);
-  displayHand(playerHand, playerTotal);
-  console.log("======================\n");
+    console.log("STARTING HAND");
+    displayHand(dealerHand, dealerTotal, (firstHand = true));
+    displayHand(playerHand, playerTotal);
+
+    while (true) {
+      playerTurn(deck, playerHand, playerTotal);
+      playerTotal = cardTotal(playerHand);
+      if (bust(playerTotal)) break;
+
+      dealerTurn(deck, dealerHand, dealerTotal);
+      dealerTotal = cardTotal(dealerHand);
+      break;
+    }
+
+    updateMatchScore(dealerTotal, playerTotal, score);
+
+    console.log("\n==================================");
+    displayResults(dealerTotal, playerTotal);
+    console.log("");
+    displayHand(dealerHand, dealerTotal);
+    displayHand(playerHand, playerTotal);
+    console.log("\nCurrent score:");
+    displayMatchScore(score);
+    console.log("==================================\n");
+
+    round++;
+  }
+  console.log("\n**********************************");
+  console.log("MATCH OVER\n");
+  console.log("SCORE:");
+  displayMatchScore(score);
+  console.log(`\n${matchWinner(score)} is the Match winner!!`);
+  console.log("**********************************\n");
 
   if (!playAgain()) break;
 }
