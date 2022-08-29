@@ -80,6 +80,8 @@ const DEALER_LIMIT = 17;
 let deck;
 let playerHand;
 let dealerHand;
+let playerTotal;
+let dealerTotal;
 let cardValues = [
   "1",
   "2",
@@ -133,22 +135,20 @@ function cardTotal(hand) {
   return sum;
 }
 
-function displayHand(hand) {
+function displayHand(hand, total, firstHand = false) {
   let values = hand.map((card) => card[1]);
   let valueString = `${values.slice(0, values.length - 1)} and ${values.slice(
     values.length - 1
   )}`;
 
   if (hand === playerHand) {
-    console.log(`Your cards: ${valueString} (sum: ${cardTotal(playerHand)})`);
+    console.log(`Your cards: ${valueString} (sum: ${total})`);
   } else if (hand === dealerHand) {
-    if (playerHand.length === 2) {
+    if (firstHand) {
       let card = dealerHand[0];
       console.log(`Dealer's cards: ${card[1]} and unknown card`);
     } else {
-      console.log(
-        `Dealer's cards: ${valueString} (sum: ${cardTotal(dealerHand)})`
-      );
+      console.log(`Dealer's cards: ${valueString} (sum: ${total})`);
     }
   }
 }
@@ -164,14 +164,14 @@ function dealFirstHand(deck, hand) {
   dealCard(deck, hand);
 }
 
-function bust(hand) {
-  return cardTotal(hand) > 21;
+function bust(total) {
+  return total > 21;
 }
 
-function playerTurn(deck, playerHand, dealerHand) {
+function playerTurn(deck, playerHand, playerTotal) {
   console.log("\nYOUR TURN");
 
-  while (!bust(playerHand)) {
+  while (!bust(playerTotal)) {
     let answer = read.question("\nHit or stay (h/s)? ");
     if (answer === "s") {
       console.log("You stay\n");
@@ -180,36 +180,34 @@ function playerTurn(deck, playerHand, dealerHand) {
     if (answer === "h") {
       console.log("Hit\n");
       dealCard(deck, playerHand);
+      playerTotal = cardTotal(playerHand);
     } else {
       console.log("Invalid input");
     }
     console.clear();
     console.log("YOUR TURN");
-    displayHand(dealerHand);
     console.log("");
-    displayHand(playerHand);
+    displayHand(playerHand, playerTotal);
   }
 }
 
-function dealerTurn(deck, dealerHand) {
+function dealerTurn(deck, dealerHand, dealerTotal) {
   console.log("\nDEALER TURN");
-  displayHand(dealerHand);
+  displayHand(dealerHand, dealerTotal);
 
-  while (cardTotal(dealerHand) <= DEALER_LIMIT) {
+  while (dealerTotal <= DEALER_LIMIT) {
     console.log("\nDealer hits");
     dealCard(deck, dealerHand);
-    displayHand(dealerHand);
+    dealerTotal = cardTotal(dealerHand);
+    displayHand(dealerHand, dealerTotal);
   }
 
-  if (!bust(dealerHand)) {
+  if (!bust(dealerTotal)) {
     console.log("\nDealer stays");
   }
 }
 
-function detectResults(dealerHand, playerHand) {
-  let dealerTotal = cardTotal(dealerHand);
-  let playerTotal = cardTotal(playerHand);
-
+function detectResults(dealerTotal, playerTotal) {
   if (playerTotal > 21) {
     return "PLAYER_BUST";
   } else if (dealerTotal > 21) {
@@ -223,8 +221,8 @@ function detectResults(dealerHand, playerHand) {
   }
 }
 
-function displayResults(dealerHand, playerHand) {
-  let result = detectResults(dealerHand, playerHand);
+function displayResults(dealerTotal, playerTotal) {
+  let result = detectResults(dealerTotal, playerTotal);
 
   switch (result) {
     case "PLAYER_BUST":
@@ -265,25 +263,29 @@ while (true) {
 
   dealFirstHand(deck, dealerHand);
   dealFirstHand(deck, playerHand);
+  playerTotal = cardTotal(playerHand);
+  dealerTotal = cardTotal(dealerHand);
 
   console.log("STARTING HAND");
-  displayHand(dealerHand);
+  displayHand(dealerHand, dealerTotal, (firstHand = true));
   console.log("");
-  displayHand(playerHand);
+  displayHand(playerHand, playerTotal);
 
   while (true) {
-    playerTurn(deck, playerHand, dealerHand);
-    if (bust(playerHand)) break;
+    playerTurn(deck, playerHand, playerTotal);
+    playerTotal = cardTotal(playerHand);
+    if (bust(playerTotal)) break;
 
-    dealerTurn(deck, dealerHand);
+    dealerTurn(deck, dealerHand, dealerTotal);
+    dealerTotal = cardTotal(dealerHand);
     break;
   }
 
   console.log("\n======================");
-  displayResults(dealerHand, playerHand);
+  displayResults(dealerTotal, playerTotal);
   console.log("");
-  displayHand(dealerHand);
-  displayHand(playerHand);
+  displayHand(dealerHand, dealerTotal);
+  displayHand(playerHand, playerTotal);
   console.log("======================\n");
 
   if (!playAgain()) break;
