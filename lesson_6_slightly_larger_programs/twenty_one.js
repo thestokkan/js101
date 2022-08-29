@@ -75,15 +75,12 @@
 // Setup
 const read = require("readline-sync");
 
+const PLAYER = { cards: [], total: 0, score: 0 };
+const DEALER = { cards: [], total: 0, score: 0 };
 const BUST_LIMIT = 21;
 const DEALER_LIMIT = 17;
-
-let deck;
-let playerHand;
-let dealerHand;
-let playerTotal;
-let dealerTotal;
-let cardValues = [
+const SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"];
+const CARD_VALUES = [
   "1",
   "2",
   "3",
@@ -99,20 +96,19 @@ let cardValues = [
   "King",
   "Ace",
 ];
-let suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
 
-function newDeck(cardValues, suits) {
+function newDeck() {
   let cards = [];
 
-  suits.forEach((suit) => {
-    cardValues.forEach((value) => {
+  SUITS.forEach((suit) => {
+    CARD_VALUES.forEach((value) => {
       cards.push([suit, value]);
     });
   });
   return cards;
 }
 
-function cardTotal(hand) {
+function total(hand) {
   let sum = 0;
   let values = hand.map((card) => card[1]);
 
@@ -136,43 +132,42 @@ function cardTotal(hand) {
   return sum;
 }
 
-function displayHand(hand, total, startingHand = false) {
+function listOfCards(hand) {
   let values = hand.map((card) => card[1]);
   let valueString = `${values.slice(0, values.length - 1)} and ${values.slice(
     values.length - 1
   )}`;
+  return valueString;
+}
 
-  if (hand === playerHand) {
-    console.log(`Your cards: ${valueString} (sum: ${total})`);
-  } else if (hand === dealerHand) {
+function displayHand(participant, startingHand = false) {
+  if (participant === "player") {
+    console.log(
+      `Your cards: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
+    );
+  } else {
     if (startingHand) {
-      let card = dealerHand[0];
+      let card = DEALER.cards[0];
       console.log(`Dealer's cards: ${card[1]} and unknown card`);
     } else {
-      console.log(`Dealer's cards: ${valueString} (sum: ${total})`);
+      console.log(
+        `Dealer's cards: ${listOfCards(DEALER.cards)} (sum: ${DEALER.total})`
+      );
     }
   }
 }
 
-function dealCard(deck, hand) {
+function dealCard(deck) {
   let cardIndex = Math.floor(Math.random() * deck.length);
-  hand.push(deck[cardIndex]);
+  let card = deck[cardIndex];
   deck.splice(cardIndex, 1);
+  return card;
 }
 
-function dealFirstHand(deck, hand) {
-  dealCard(deck, hand);
-  dealCard(deck, hand);
-}
-
-function bust(total) {
-  return total > BUST_LIMIT;
-}
-
-function playerTurn(deck, playerHand, playerTotal) {
+function playerTurn(deck) {
   console.log("\nYOUR TURN");
 
-  while (!bust(playerTotal)) {
+  while (PLAYER.total < BUST_LIMIT) {
     let answer = read.question("\nHit or stay (h/s)? ");
     if (answer === "s") {
       console.log("You stay\n");
@@ -180,49 +175,49 @@ function playerTurn(deck, playerHand, playerTotal) {
     }
     if (answer === "h") {
       console.log("Hit\n");
-      dealCard(deck, playerHand);
-      playerTotal = cardTotal(playerHand);
+      PLAYER.cards.push(dealCard(deck));
+      PLAYER.total = total(PLAYER.cards);
     } else {
       console.log("Invalid input");
     }
     console.clear();
     console.log("YOUR TURN\n");
-    displayHand(playerHand, playerTotal);
+    displayHand("player");
   }
 }
 
-function dealerTurn(deck, dealerHand, dealerTotal) {
+function dealerTurn(deck) {
   console.log("\nDEALER TURN");
-  displayHand(dealerHand, dealerTotal);
+  displayHand("dealer");
 
-  while (dealerTotal <= DEALER_LIMIT) {
+  while (DEALER.total <= DEALER_LIMIT) {
     console.log("\nDealer hits");
-    dealCard(deck, dealerHand);
-    dealerTotal = cardTotal(dealerHand);
-    displayHand(dealerHand, dealerTotal);
+    DEALER.cards.push(dealCard(deck));
+    DEALER.total = total(DEALER.cards);
+    displayHand("dealer");
   }
 
-  if (!bust(dealerTotal)) {
+  if (DEALER.total < BUST_LIMIT) {
     console.log("\nDealer stays");
   }
 }
 
-function detectResults(dealerTotal, playerTotal) {
-  if (playerTotal > BUST_LIMIT) {
+function detectResults() {
+  if (PLAYER.total > BUST_LIMIT) {
     return "PLAYER_BUST";
-  } else if (dealerTotal > BUST_LIMIT) {
+  } else if (DEALER.total > BUST_LIMIT) {
     return "DEALER_BUST";
-  } else if (playerTotal > dealerTotal) {
+  } else if (PLAYER.total > DEALER.total) {
     return "PLAYER";
-  } else if (playerTotal < dealerTotal) {
+  } else if (PLAYER.total < DEALER.total) {
     return "DEALER";
   } else {
     return "TIE";
   }
 }
 
-function displayResults(dealerTotal, playerTotal) {
-  let result = detectResults(dealerTotal, playerTotal);
+function displayResults() {
+  let result = detectResults();
 
   switch (result) {
     case "PLAYER_BUST":
@@ -242,57 +237,51 @@ function displayResults(dealerTotal, playerTotal) {
   }
 }
 
-function updateMatchScore(dealerTotal, playerTotal, score) {
-  let result = detectResults(dealerTotal, playerTotal);
+function updateMatchScore() {
+  let result = detectResults();
   switch (result) {
     case "PLAYER_BUST":
-      score.dealer += 1;
+      DEALER.score += 1;
       break;
     case "DEALER_BUST":
-      score.player += 1;
+      PLAYER.score += 1;
       break;
     case "PLAYER":
-      score.player += 1;
+      PLAYER.score += 1;
       break;
     case "DEALER":
-      score.dealer += 1;
+      DEALER.score += 1;
       break;
   }
 }
 
-function matchWinner(score) {
-  if (score.player > score.dealer) {
+function matchWinner() {
+  if (PLAYER.score > DEALER.score) {
     return "PLAYER";
   } else {
     return "DEALER";
   }
 }
 
-function displayMatchScore(score) {
-  console.log(`SCORE: Player: ${score.player}  Dealer: ${score.dealer}`);
+function displayMatchScore() {
+  console.log(`SCORE: Player: ${PLAYER.score}  Dealer: ${DEALER.score}`);
 }
 
-function displayRoundSummary(
-  dealerHand,
-  playerHand,
-  dealerTotal,
-  playerTotal,
-  score
-) {
+function displayRoundSummary() {
   console.log("\n==================================");
-  displayResults(dealerTotal, playerTotal);
-  displayHand(dealerHand, dealerTotal);
-  displayHand(playerHand, playerTotal);
-  displayMatchScore(score);
+  displayResults();
+  displayHand("dealer");
+  displayHand("player");
+  displayMatchScore();
   console.log("==================================");
 }
 
-function displayMatchWinner(score) {
+function displayMatchWinner() {
   console.clear();
   console.log("\n**********************************");
   console.log("MATCH OVER\n");
-  displayMatchScore(score);
-  console.log(`\n${matchWinner(score)} is the Match winner!!`);
+  displayMatchScore();
+  console.log(`\n${matchWinner()} is the Match winner!!`);
   console.log("**********************************\n");
 }
 
@@ -307,59 +296,48 @@ function playAgain() {
 }
 
 // Match loop
-
-// Game loop
 while (true) {
   let round = 1;
-  let score = { player: 0, dealer: 0 };
+  PLAYER.score = 0;
+  DEALER.score = 0;
 
   console.clear();
   console.log("Welcome to TWENTY-ONE!\n");
   console.log("*** Let's play best out of 5 ***\n\n");
 
-  while (!Object.values(score).includes(3)) {
+  // Game loop
+  while (PLAYER.score < 3 && DEALER.score < 3) {
     read.question("\nPress <Enter> to continue");
     console.clear();
     console.log(`*** Round ${round} ***\n`);
 
-    deck = newDeck(cardValues, suits);
-    playerHand = [];
-    dealerHand = [];
+    let deck = newDeck();
+    PLAYER.cards = [dealCard(deck), dealCard(deck)];
+    DEALER.cards = [dealCard(deck), dealCard(deck)];
 
-    dealFirstHand(deck, dealerHand);
-    dealFirstHand(deck, playerHand);
-    playerTotal = cardTotal(playerHand);
-    dealerTotal = cardTotal(dealerHand);
+    PLAYER.total = total(PLAYER.cards);
+    DEALER.total = total(DEALER.cards);
 
     console.log("STARTING HAND");
-    displayHand(dealerHand, dealerTotal, (startingHand = true));
-    displayHand(playerHand, playerTotal);
+    displayHand("dealer", (startingHand = true));
+    displayHand("player");
 
     while (true) {
-      playerTurn(deck, playerHand, playerTotal);
-      playerTotal = cardTotal(playerHand);
-      if (bust(playerTotal)) break;
+      playerTurn(deck);
+      if (PLAYER.total > BUST_LIMIT) break;
 
-      dealerTurn(deck, dealerHand, dealerTotal);
-      dealerTotal = cardTotal(dealerHand);
+      dealerTurn(deck);
       break;
     }
 
-    updateMatchScore(dealerTotal, playerTotal, score);
-
-    displayRoundSummary(
-      dealerHand,
-      playerHand,
-      dealerTotal,
-      playerTotal,
-      score
-    );
+    updateMatchScore();
+    displayRoundSummary();
 
     round++;
   }
 
   read.question("\n\nPress <Enter> to continue");
-  displayMatchWinner(score);
+  displayMatchWinner();
 
   if (!playAgain()) break;
 }
