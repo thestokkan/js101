@@ -272,6 +272,21 @@ function displayMatchScore(score) {
   console.log(`SCORE: Player: ${score.player}  Dealer: ${score.dealer}`);
 }
 
+function displayRoundSummary(
+  dealerHand,
+  playerHand,
+  dealerTotal,
+  playerTotal,
+  score
+) {
+  console.log("\n==================================");
+  displayResults(dealerTotal, playerTotal);
+  displayHand(dealerHand, dealerTotal);
+  displayHand(playerHand, playerTotal);
+  displayMatchScore(score);
+  console.log("==================================");
+}
+
 function displayMatchWinner(score) {
   console.clear();
   console.log("\n**********************************");
@@ -332,12 +347,13 @@ while (true) {
 
     updateMatchScore(dealerTotal, playerTotal, score);
 
-    console.log("\n==================================");
-    displayResults(dealerTotal, playerTotal);
-    displayHand(dealerHand, dealerTotal);
-    displayHand(playerHand, playerTotal);
-    displayMatchScore(score);
-    console.log("==================================");
+    displayRoundSummary(
+      dealerHand,
+      playerHand,
+      dealerTotal,
+      playerTotal,
+      score
+    );
 
     round++;
   }
