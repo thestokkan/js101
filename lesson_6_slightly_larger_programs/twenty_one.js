@@ -75,6 +75,7 @@
 // Setup
 const read = require("readline-sync");
 
+const BUST_LIMIT = 21;
 const DEALER_LIMIT = 17;
 
 let deck;
@@ -129,13 +130,13 @@ function cardTotal(hand) {
   values
     .filter((value) => value === "Ace")
     .forEach((_) => {
-      if (sum > 21) sum -= 10;
+      if (sum > BUST_LIMIT) sum -= 10;
     });
 
   return sum;
 }
 
-function displayHand(hand, total, firstHand = false) {
+function displayHand(hand, total, startingHand = false) {
   let values = hand.map((card) => card[1]);
   let valueString = `${values.slice(0, values.length - 1)} and ${values.slice(
     values.length - 1
@@ -144,7 +145,7 @@ function displayHand(hand, total, firstHand = false) {
   if (hand === playerHand) {
     console.log(`Your cards: ${valueString} (sum: ${total})`);
   } else if (hand === dealerHand) {
-    if (firstHand) {
+    if (startingHand) {
       let card = dealerHand[0];
       console.log(`Dealer's cards: ${card[1]} and unknown card`);
     } else {
@@ -165,7 +166,7 @@ function dealFirstHand(deck, hand) {
 }
 
 function bust(total) {
-  return total > 21;
+  return total > BUST_LIMIT;
 }
 
 function playerTurn(deck, playerHand, playerTotal) {
@@ -185,8 +186,7 @@ function playerTurn(deck, playerHand, playerTotal) {
       console.log("Invalid input");
     }
     console.clear();
-    console.log("YOUR TURN");
-    console.log("");
+    console.log("YOUR TURN\n");
     displayHand(playerHand, playerTotal);
   }
 }
@@ -208,9 +208,9 @@ function dealerTurn(deck, dealerHand, dealerTotal) {
 }
 
 function detectResults(dealerTotal, playerTotal) {
-  if (playerTotal > 21) {
+  if (playerTotal > BUST_LIMIT) {
     return "PLAYER_BUST";
-  } else if (dealerTotal > 21) {
+  } else if (dealerTotal > BUST_LIMIT) {
     return "DEALER_BUST";
   } else if (playerTotal > dealerTotal) {
     return "PLAYER";
@@ -308,7 +308,7 @@ while (true) {
     dealerTotal = cardTotal(dealerHand);
 
     console.log("STARTING HAND");
-    displayHand(dealerHand, dealerTotal, (firstHand = true));
+    displayHand(dealerHand, dealerTotal, (startingHand = true));
     displayHand(playerHand, playerTotal);
 
     while (true) {
