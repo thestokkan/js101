@@ -226,19 +226,19 @@ function displayResults(dealerTotal, playerTotal) {
 
   switch (result) {
     case "PLAYER_BUST":
-      console.log("You busted!\nDEALER WINS!");
+      console.log("You busted!\nDEALER WINS!\n");
       break;
     case "DEALER_BUST":
-      console.log("Dealer busted!\nYOU WIN!");
+      console.log("Dealer busted!\nYOU WIN!\n");
       break;
     case "PLAYER":
-      console.log("YOU WIN!");
+      console.log("YOU WIN!\n");
       break;
     case "DEALER":
-      console.log("DEALER WINS!");
+      console.log("DEALER WINS!\n");
       break;
     case "TIE":
-      console.log("IT'S A TIE!");
+      console.log("IT'S A TIE!\n");
   }
 }
 
@@ -269,7 +269,16 @@ function matchWinner(score) {
 }
 
 function displayMatchScore(score) {
-  console.log(`Player: ${score.player}  Dealer: ${score.dealer}`);
+  console.log(`SCORE: Player: ${score.player}  Dealer: ${score.dealer}`);
+}
+
+function displayMatchWinner(score) {
+  console.clear();
+  console.log("\n**********************************");
+  console.log("MATCH OVER\n");
+  displayMatchScore(score);
+  console.log(`\n${matchWinner(score)} is the Match winner!!`);
+  console.log("**********************************\n");
 }
 
 function playAgain() {
@@ -325,21 +334,16 @@ while (true) {
 
     console.log("\n==================================");
     displayResults(dealerTotal, playerTotal);
-    console.log("");
     displayHand(dealerHand, dealerTotal);
     displayHand(playerHand, playerTotal);
-    console.log("\nCurrent score:");
     displayMatchScore(score);
-    console.log("==================================\n");
+    console.log("==================================");
 
     round++;
   }
-  console.log("\n**********************************");
-  console.log("MATCH OVER\n");
-  console.log("SCORE:");
-  displayMatchScore(score);
-  console.log(`\n${matchWinner(score)} is the Match winner!!`);
-  console.log("**********************************\n");
+
+  read.question("\n\nPress <Enter> to continue");
+  displayMatchWinner(score);
 
   if (!playAgain()) break;
 }
