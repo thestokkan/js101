@@ -145,15 +145,13 @@ function displayHand(participant, startingHand = false) {
     console.log(
       `Your cards: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
     );
+  } else if (startingHand) {
+    let card = DEALER.cards[0];
+    console.log(`Dealer's cards: ${card[1]} and unknown card`);
   } else {
-    if (startingHand) {
-      let card = DEALER.cards[0];
-      console.log(`Dealer's cards: ${card[1]} and unknown card`);
-    } else {
-      console.log(
-        `Dealer's cards: ${listOfCards(DEALER.cards)} (sum: ${DEALER.total})`
-      );
-    }
+    console.log(
+      `Dealer's cards: ${listOfCards(DEALER.cards)} (sum: ${DEALER.total})`
+    );
   }
 }
 
