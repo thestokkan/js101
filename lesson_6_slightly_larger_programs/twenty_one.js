@@ -114,9 +114,9 @@ function newDeck() {
 
 function total(hand) {
   let sum = 0;
-  let values = hand.map((card) => card[1]);
+  let cardValues = hand.map((card) => card[1]);
 
-  values.forEach((value) => {
+  cardValues.forEach((value) => {
     if (value === "Ace") {
       sum += ACE_VALUE;
     } else if (["Jack", "Queen", "King"].includes(value)) {
@@ -127,7 +127,7 @@ function total(hand) {
   });
 
   // Correct for aces
-  values
+  cardValues
     .filter((value) => value === "Ace")
     .forEach((_) => {
       if (sum > BUST_LIMIT) sum -= ACE_CORRECTION_VALUE;
@@ -137,16 +137,22 @@ function total(hand) {
 }
 
 function listOfCards(hand) {
-  let values = hand.map((card) => card[1]);
-  let valueString = `${values.slice(0, values.length - 1)} and ${values.slice(
-    values.length - 1
-  )}`;
-  return valueString;
+  let cardValues = hand.map((card) => card[1]);
+  let allButLastValue = cardValues.slice(0, cardValues.length - 1);
+  let lastValue = cardValues.slice(cardValues.length - 1);
+  let stringOfValues;
+  if (allButLastValue.length < 2) {
+    stringOfValues = `${allButLastValue} and ${lastValue}`;
+  } else {
+    stringOfValues = `${allButLastValue.join(", ")}, and ${lastValue}`;
+  }
+
+  return stringOfValues;
 }
 
 function displayStartingHands() {
-  let dealersFirstCard = DEALER.cards[0];
-  console.log(`Dealer was dealt: ${dealersFirstCard[1]} and unknown card`);
+  let valueOfDealersFirstCard = DEALER.cards[0][1];
+  console.log(`Dealer was dealt: ${valueOfDealersFirstCard} and unknown card`);
   console.log(
     `You were dealt: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
   );
