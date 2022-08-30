@@ -114,7 +114,7 @@ const RULES =
   "   - If the dealer busts, you win.\n" +
   `   - Otherwise, the one with a card total closest to ${BUST_LIMIT} wins.\n` +
   "   - If your card totals are  equal, it's a draw.\n" +
-  "\n Calculating card total:\n" +
+  "\n Calculating card value total:\n" +
   "  - Value 2-10: face value\n" +
   "  - Jack, Queen, King: 10\n" +
   `  - Ace: 11, unless it pushes the card total over ${BUST_LIMIT}; then it's 1.\n`;
@@ -177,17 +177,17 @@ function displayStartingHands() {
   let valueOfDealersFirstCard = DEALER.cards[0].value;
   console.log(`Dealer was dealt: ${valueOfDealersFirstCard} and unknown card`);
   console.log(
-    `You were dealt: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
+    `You were dealt: ${listOfCards(PLAYER.cards)} (total: ${PLAYER.total})`
   );
 }
 function displayHand(participant) {
   if (participant === "Player") {
     console.log(
-      `Your cards: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
+      `Your cards: ${listOfCards(PLAYER.cards)} (total: ${PLAYER.total})`
     );
   } else {
     console.log(
-      `Dealer's cards: ${listOfCards(DEALER.cards)} (sum: ${DEALER.total})`
+      `Dealer's cards: ${listOfCards(DEALER.cards)} (total: ${DEALER.total})`
     );
   }
 }
