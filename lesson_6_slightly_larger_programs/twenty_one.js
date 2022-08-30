@@ -101,6 +101,24 @@ const CARD_VALUES = [
   "Ace",
 ];
 
+const RULES =
+  "RULES:\n" +
+  `The aim of the game is to get as close to ${BUST_LIMIT} as possible` +
+  "without going over (bust).\n" +
+  "1. You and the dealer are dealt two carsd each.\n" +
+  "2. Your turn: keep getting another card (hit) until you bust or choose to stay.\n" +
+  "3. Dealer turn: dealer may hit until dealer busts or chooses to stay.\n" +
+  "4. The game ends if someone busts or both choose to stay.\n" +
+  "5. Declaring the winner:\n" +
+  "   - If you bust, the dealer wins.\n" +
+  "   - If the dealer busts, you win.\n" +
+  `   - Otherwise, the one with a card total closest to ${BUST_LIMIT} wins.\n` +
+  "   - If your card totals are  equal, it's a draw.\n" +
+  "\n Calculating card total:\n" +
+  "  - Value 2-10: face value\n" +
+  "  - Jack, Queen, King: 10\n" +
+  `  - Ace: 11, unless it pushes the card total over ${BUST_LIMIT}; then it's 1.\n`;
+
 function newDeck() {
   let cards = [];
 
@@ -110,6 +128,11 @@ function newDeck() {
     });
   });
   return cards;
+}
+
+function displayWelcomeMessage() {
+  console.log("Welcome to TWENTY-ONE!\n");
+  console.log(RULES);
 }
 
 function total(hand) {
@@ -353,14 +376,15 @@ function playAgain() {
 }
 
 // Match loop
+let matchRound = 1;
 while (true) {
   let round = 1;
   PLAYER.score = 0;
   DEALER.score = 0;
 
   console.clear();
-  console.log("Welcome to TWENTY-ONE!\n");
-  console.log("*** Let's play best out of 5 ***\n\n");
+  if (matchRound === 1) displayWelcomeMessage();
+  console.log("\n*** Let's play best out of 5 ***\n\n");
 
   // Game loop
   while (!matchWinner()) {
@@ -397,6 +421,7 @@ while (true) {
   pressEnterToContinue();
   displayMatchWinner();
 
+  matchRound += 1;
   if (!playAgain()) break;
 }
 
