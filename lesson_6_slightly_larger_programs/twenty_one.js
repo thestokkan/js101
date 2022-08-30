@@ -106,7 +106,7 @@ function newDeck() {
 
   SUITS.forEach((suit) => {
     CARD_VALUES.forEach((value) => {
-      cards.push([suit, value]);
+      cards.push({ suit: suit, value: value });
     });
   });
   return cards;
@@ -114,7 +114,7 @@ function newDeck() {
 
 function total(hand) {
   let sum = 0;
-  let cardValues = hand.map((card) => card[1]);
+  let cardValues = hand.map((card) => card.value);
 
   cardValues.forEach((value) => {
     if (value === "Ace") {
@@ -137,7 +137,7 @@ function total(hand) {
 }
 
 function listOfCards(hand) {
-  let cardValues = hand.map((card) => card[1]);
+  let cardValues = hand.map((card) => card.value);
   let allButLastValue = cardValues.slice(0, cardValues.length - 1);
   let lastValue = cardValues.slice(cardValues.length - 1);
   let stringOfValues;
@@ -151,7 +151,7 @@ function listOfCards(hand) {
 }
 
 function displayStartingHands() {
-  let valueOfDealersFirstCard = DEALER.cards[0][1];
+  let valueOfDealersFirstCard = DEALER.cards[0].value;
   console.log(`Dealer was dealt: ${valueOfDealersFirstCard} and unknown card`);
   console.log(
     `You were dealt: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
