@@ -180,7 +180,7 @@ function playerTurn(deck) {
   console.log("\nYOUR TURN");
 
   while (PLAYER.total < BUST_LIMIT) {
-    let answer = read.question("\nHit or stay (h/s)? ");
+    let answer = read.question("\nHit or stay (h/s)? ").toLowerCase();
     if (answer === "s") {
       console.log("You stay\n");
       break;
@@ -189,16 +189,19 @@ function playerTurn(deck) {
       console.log("Hit\n");
       PLAYER.cards.push(dealCard(deck));
       PLAYER.total = total(PLAYER.cards);
-    } else {
-      console.log("Invalid input");
     }
     console.clear();
     console.log("YOUR TURN\n");
     displayHand("player");
+    if (!["h", "s"].includes(answer)) {
+      console.log("\nInvalid input, try again...");
+    }
   }
 }
 
 function dealerTurn(deck) {
+  read.question("Press <Enter> to continue");
+  console.clear();
   console.log("\nDEALER TURN");
   displayHand("dealer");
 
