@@ -79,6 +79,10 @@ const PLAYER = { cards: [], total: 0, score: 0 };
 const DEALER = { cards: [], total: 0, score: 0 };
 const BUST_LIMIT = 21;
 const DEALER_LIMIT = 17;
+const ACE_VALUE = 11;
+const FACE_CARD_VALUE = 10;
+const ACE_CORRECTION_VALUE = 10;
+const SCORE_TO_WIN = 3;
 const SUITS = ["Hearts", "Diamonds", "Clubs", "Spades"];
 const CARD_VALUES = [
   "1",
@@ -114,9 +118,9 @@ function total(hand) {
 
   values.forEach((value) => {
     if (value === "Ace") {
-      sum += 11;
+      sum += ACE_VALUE;
     } else if (["Jack", "Queen", "King"].includes(value)) {
-      sum += 10;
+      sum += FACE_CARD_VALUE;
     } else {
       sum += Number(value);
     }
@@ -126,7 +130,7 @@ function total(hand) {
   values
     .filter((value) => value === "Ace")
     .forEach((_) => {
-      if (sum > BUST_LIMIT) sum -= 10;
+      if (sum > BUST_LIMIT) sum -= ACE_CORRECTION_VALUE;
     });
 
   return sum;
@@ -140,14 +144,18 @@ function listOfCards(hand) {
   return valueString;
 }
 
-function displayHand(participant, startingHand = false) {
+function displayStartingHands() {
+  let dealersFirstCard = DEALER.cards[0];
+  console.log(`Dealer was dealt: ${dealersFirstCard[1]} and unknown card`);
+  console.log(
+    `You were dealt: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
+  );
+}
+function displayHand(participant) {
   if (participant === "player") {
     console.log(
       `Your cards: ${listOfCards(PLAYER.cards)} (sum: ${PLAYER.total})`
     );
-  } else if (startingHand) {
-    let card = DEALER.cards[0];
-    console.log(`Dealer's cards: ${card[1]} and unknown card`);
   } else {
     console.log(
       `Dealer's cards: ${listOfCards(DEALER.cards)} (sum: ${DEALER.total})`
@@ -304,7 +312,7 @@ while (true) {
   console.log("*** Let's play best out of 5 ***\n\n");
 
   // Game loop
-  while (PLAYER.score < 3 && DEALER.score < 3) {
+  while (PLAYER.score < SCORE_TO_WIN && DEALER.score < SCORE_TO_WIN) {
     read.question("\nPress <Enter> to continue");
     console.clear();
     console.log(`*** Round ${round} ***\n`);
@@ -317,8 +325,7 @@ while (true) {
     DEALER.total = total(DEALER.cards);
 
     console.log("STARTING HAND");
-    displayHand("dealer", (startingHand = true));
-    displayHand("player");
+    displayStartingHands();
 
     while (true) {
       playerTurn(deck);
