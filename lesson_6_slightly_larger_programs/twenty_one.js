@@ -226,19 +226,21 @@ function hit(participant, deck) {
 }
 
 function displayHit(participant) {
-  let lastCardDealt;
+  console.clear();
 
+  let lastCardDealt;
   if (participant === "Player") {
     lastCardDealt = PLAYER.cards[PLAYER.cards.length - 1];
+    console.log("YOUR TURN\n");
   } else {
     lastCardDealt = DEALER.cards[DEALER.cards.length - 1];
+    console.log("DEALER'S TURN\n");
   }
   console.log(`${participant} hits --> ${lastCardDealt.value}\n`);
+  displayHand(participant);
 }
 
 function playerTurn(deck) {
-  displayTurn("Player");
-
   while (PLAYER.total < BUST_LIMIT) {
     let answer = read.question("\nHit or stay (h/s)? ").toLowerCase();
     if (answer === "s") {
@@ -246,24 +248,18 @@ function playerTurn(deck) {
       console.log(`\nYou stay with a total of ${PLAYER.total}\n`);
       break;
     } else if (answer === "h") {
-      console.clear();
-      console.log("YOUR TURN\n");
-
       hit("Player", deck);
       displayHit("Player");
-      displayHand("Player");
     } else {
       console.log("Invalid input.");
     }
   }
   if (PLAYER.total === BUST_LIMIT) {
-    console.log(`\nYou've got ${BUST_LIMIT}! Let's stay with that one.`);
+    console.log(`\nYou've got ${BUST_LIMIT}, let's stay!`);
   }
 }
 
 function dealerTurn(deck) {
-  displayTurn("Dealer");
-
   while (DEALER.total <= DEALER_LIMIT) {
     pressEnterToContinue();
     console.clear();
@@ -271,7 +267,7 @@ function dealerTurn(deck) {
 
     hit("Dealer", deck);
     displayHit("Dealer");
-    displayHand("Dealer");
+    // displayHand("Dealer");
   }
 
   if (DEALER.total < BUST_LIMIT) {
@@ -298,10 +294,10 @@ function displayResults() {
 
   switch (result) {
     case "PLAYER_BUST":
-      console.log(`You busted with ${PLAYER.total}! --> DEALER WINS!\n`);
+      console.log(`You busted! --> DEALER WINS!\n`);
       break;
     case "DEALER_BUST":
-      console.log(`Dealer busted with ${DEALER.total}! --> YOU WIN!\n`);
+      console.log(`Dealer busted! --> YOU WIN!\n`);
       break;
     case "PLAYER":
       console.log("YOU WIN!\n");
@@ -383,7 +379,11 @@ while (true) {
   DEALER.score = 0;
 
   console.clear();
-  if (matchRound === 1) displayWelcomeMessage();
+  if (matchRound === 1) {
+    displayWelcomeMessage();
+  } else {
+    console.log("ONE MORE TIME!");
+  }
   console.log("\n*** Let's play best out of 5 ***\n\n");
 
   // Game loop
@@ -404,10 +404,12 @@ while (true) {
     pressEnterToContinue();
 
     while (true) {
+      displayTurn("Player");
       playerTurn(deck);
       if (PLAYER.total > BUST_LIMIT) break;
 
       pressEnterToContinue();
+      displayTurn("Dealer");
       dealerTurn(deck);
       break;
     }
